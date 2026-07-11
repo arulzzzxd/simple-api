@@ -1,0 +1,2443 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="icon.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500;600&family=Source+Code+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: #fff; 
+            color: #000;
+            letter-spacing: -0.01em;
+        }
+        
+        .code-font {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Courier New', monospace;
+            font-variant-ligatures: contextual;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .bg-grid { 
+            position: fixed; 
+            inset: 0; 
+            z-index: -10; 
+            background-image: 
+                linear-gradient(#00000008 1px, transparent 1px), 
+                linear-gradient(90deg, #00000008 1px, transparent 1px); 
+            background-size: 35px 35px; 
+            mask-image: radial-gradient(circle at center, black 60%, transparent 95%); 
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 300px;
+            background: #fff;
+            border-right: 2px solid #000;
+            z-index: 40;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateX(-100%);
+        }
+        
+        .sidebar.active {
+            transform: translateX(0);
+        }
+        
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.15);
+            z-index: 30;
+            display: none;
+            backdrop-filter: blur(2px);
+        }
+        
+        .sidebar-overlay.active {
+            display: block;
+        }
+        
+        /* Card styling */
+        .endpoint-card {
+            border: 2px solid #000;
+            background: #fff;
+            transition: all 0.2s;
+        }
+        
+        .endpoint-card:hover {
+            box-shadow: 6px 6px 0px #000;
+            transform: translate(-2px, -2px);
+        }
+        
+        .method-badge {
+            font-size: 11px;
+            font-weight: 900;
+            padding: 2px 10px;
+            border: 1.5px solid #000;
+            text-transform: uppercase;
+        }
+        
+        .method-get {
+            background: #000;
+            color: #fff;
+        }
+        
+        .method-post {
+            background: #000;
+            color: #fff;
+        }
+        
+        .method-put {
+            background: #000;
+            color: #fff;
+        }
+        
+        .method-delete {
+            background: #000;
+            color: #fff;
+        }
+        
+        .method-patch {
+            background: #000;
+            color: #fff;
+        }
+        
+        /* Input styling */
+        .input-field {
+            border: 1.5px solid #000;
+            background: #fff;
+            transition: all 0.2s;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            box-shadow: 3px 3px 0px #000;
+        }
+        
+        /* Button styling */
+        .btn-primary {
+            border: 2px solid #000;
+            background: #000;
+            color: #fff;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary:hover {
+            background: #fff;
+            color: #000;
+            box-shadow: 4px 4px 0px #000;
+        }
+        
+        .btn-secondary {
+            border: 1.5px solid #000;
+            background: #fff;
+            color: #000;
+            transition: all 0.2s;
+        }
+        
+        .btn-secondary:hover {
+            background: #000;
+            color: #fff;
+        }
+        
+        /* Code block - STYLISH VERSION */
+        .code-block {
+            border: 1.5px solid #000;
+            background: #fafafa;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            tab-size: 2;
+        }
+        
+        /* Response area - SPECIAL STYLING */
+        .response-block {
+            border: 1.5px solid #000;
+            background: #f8f9fa;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #2d3748;
+        }
+        
+        /* Syntax highlighting untuk response JSON */
+        .json-key { color: #0ea5e9; }
+        .json-string { color: #059669; }
+        .json-number { color: #d97706; }
+        .json-boolean { color: #7c3aed; }
+        .json-null { color: #dc2626; }
+        
+        /* Navigation link */
+        .nav-link {
+            transition: all 0.2s;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        
+        .nav-link:hover {
+            background: #f5f5f5;
+        }
+        
+        .nav-link.active {
+            background: #000;
+            color: #fff;
+        }
+        
+        /* Custom scrollbar untuk code blocks */
+        .code-block::-webkit-scrollbar,
+        .response-block::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        .code-block::-webkit-scrollbar-track,
+        .response-block::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .code-block::-webkit-scrollbar-thumb,
+        .response-block::-webkit-scrollbar-thumb {
+            background: #000;
+            border-radius: 4px;
+        }
+        
+        /* PERBAIKAN: Scrollbar untuk sidebar dan endpoints list */
+        .sidebar {
+            overflow-y: auto;
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #000;
+            border-radius: 3px;
+        }
+        
+        /* PERBAIKAN: Container endpoints list harus scrollable */
+        #endpoints-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        
+        #endpoints-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        #endpoints-list::-webkit-scrollbar-track {
+            background: #f5f5f5;
+        }
+        
+        #endpoints-list::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 2px;
+        }
+        
+        #endpoints-list::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+        
+        /* Loading animation */
+        .loading-dots {
+            display: inline-flex;
+            gap: 4px;
+        }
+        
+        .loading-dots span {
+            width: 6px;
+            height: 6px;
+            background: #000;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        
+        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        /* Pre element styling */
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .response-success {
+            color: #059669;
+            font-weight: bold;
+        }
+        
+        .response-error {
+            color: #dc2626;
+            font-weight: bold;
+        }
+        
+        /* NEW: Media preview styling - SIMPLE VERSION */
+        .media-preview {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .media-preview img,
+        .media-preview video {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .media-preview audio {
+            width: 100%;
+        }
+        
+        .media-info {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #000;
+            color: white;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        
+        .download-btn:hover {
+            background: #333;
+            transform: translateY(-2px);
+        }
+        
+        /* NEW: Headers section - IMPROVED STYLE */
+        .headers-section {
+            margin-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 1.5rem;
+        }
+        
+        .headers-title {
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.125rem;
+        }
+        
+        .headers-table-container {
+            border: 1.5px solid #000;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background: #fff;
+        }
+        
+        .headers-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .headers-table thead {
+            background: #000;
+        }
+        
+        .headers-table th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 700;
+            color: #fff;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .headers-table tbody tr {
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .headers-table tbody tr:last-child {
+            border-bottom: none;
+        }
+        
+        .headers-table tbody tr:hover {
+            background: #f9fafb;
+        }
+        
+        .headers-table td {
+            padding: 0.75rem 1rem;
+            vertical-align: top;
+        }
+        
+        .header-name-cell {
+            width: 30%;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            color: #111827;
+        }
+        
+        .header-value-cell {
+            width: 70%;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            color: #374151;
+            word-break: break-word;
+        }
+        
+        /* NEW: Headers card alternative */
+        .headers-card {
+            border: 2px solid #000;
+            background: #fff;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .headers-card-header {
+            background: #000;
+            color: #fff;
+            padding: 0.75rem 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .headers-card-body {
+            padding: 0;
+        }
+        
+        .header-row {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0.75rem 1rem;
+        }
+        
+        .header-row:last-child {
+            border-bottom: none;
+        }
+        
+        .header-row:hover {
+            background: #f9fafb;
+        }
+        
+        .header-label {
+            width: 30%;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            color: #111827;
+        }
+        
+        .header-value {
+            width: 70%;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            color: #374151;
+            word-break: break-word;
+        }
+        
+        /* NEW: File upload styling */
+        .file-upload-area {
+            border: 2px dashed #000;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+            background: #fafafa;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .file-upload-area:hover {
+            background: #f0f0f0;
+            border-color: #333;
+        }
+        
+        .file-upload-area.dragover {
+            background: #e0f2fe;
+            border-color: #0ea5e9;
+        }
+        
+        .file-list {
+            margin-top: 1rem;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: #f9fafb;
+            border-radius: 0.375rem;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 0.5rem;
+        }
+        
+        .file-info {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .file-size {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .remove-file {
+            color: #ef4444;
+            cursor: pointer;
+        }
+        
+        /* NEW: Text response styling */
+        .text-response {
+            white-space: pre-wrap;
+            word-break: break-word;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        
+        /* NEW: No headers message */
+        .no-headers {
+            padding: 2rem;
+            text-align: center;
+            color: #6b7280;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Background Grid -->
+    <div class="bg-grid"></div>
+    
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+    
+    <!-- Fixed Header -->
+    <header class="fixed top-0 left-0 w-full h-16 bg-white border-b-2 border-black z-30 flex items-center justify-center">
+        <div class="flex flex-col items-center">
+            <h1 class="font-black text-xl tracking-widest uppercase">API Documentation</h1>
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mt-1">Explore and test endpoints</p>
+        </div>
+    </header>
+    
+    <!-- Mobile Menu Toggle (Tombol garis 3) -->
+    <button id="sidebar-toggle" class="fixed left-5 top-5 z-40 bg-white border-2 border-black p-3 cursor-pointer transition-transform active:scale-90 md:hidden">
+        <i class="fas fa-bars text-base"></i>
+    </button>
+    
+    <!-- TOMBOL STATUS PAGE BARU - TAMBAHKAN INI -->
+    <button id="status-page-btn" class="fixed right-5 top-5 z-40 bg-white border-2 border-black p-3 cursor-pointer transition-transform active:scale-90 hover:bg-black hover:text-white">
+        <i class="fas fa-chart-line text-base"></i>
+    </button>
+    
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+        <div class="p-6 border-b-2 border-black bg-white flex justify-between items-center">
+            <h1 class="font-black text-sm tracking-widest uppercase">API Navigation</h1>
+            <button id="sidebar-close" class="p-2 border border-black hover:bg-black hover:text-white transition-colors md:hidden">
+                <i class="fas fa-times text-sm"></i>
+            </button>
+        </div>
+        
+        <!-- Navigation Menu -->
+        <div class="p-4 border-b border-gray-200">
+            <div class="nav-link active px-4 py-3 rounded mb-2 flex items-center gap-3 cursor-pointer" data-view="dashboard">
+                <i class="fas fa-home text-sm"></i>
+                <span class="text-sm font-bold">Dashboard</span>
+            </div>
+            <div class="nav-link px-4 py-3 rounded flex items-center gap-3 cursor-pointer" data-view="category-all">
+                <i class="fas fa-list text-sm"></i>
+                <span class="text-sm font-bold">All Endpoints</span>
+            </div>
+        </div>
+        
+        <!-- Search Box -->
+        <div class="p-4 border-b border-gray-200">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400 text-sm"></i>
+                </div>
+                <input type="text" id="search-input" placeholder="Search endpoints..." 
+                       class="input-field w-full pl-10 pr-4 py-2.5 rounded focus:outline-none text-sm">
+            </div>
+        </div>
+        
+        <!-- Categories Section -->
+        <div class="p-4 border-b border-gray-200">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-xs font-black text-gray-500 uppercase tracking-wider">Categories</p>
+                <span id="categories-count" class="text-xs font-bold bg-black text-white px-2 py-1 rounded">0</span>
+            </div>
+            <div id="categories-list" class="space-y-1 max-h-60 overflow-y-auto">
+                <!-- Categories will be populated by JavaScript -->
+                <div class="animate-pulse">
+                    <div class="h-8 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-8 bg-gray-200 rounded mb-2"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Endpoints Section - PERBAIKAN: Container harus bisa scroll -->
+        <div class="p-4">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-xs font-black text-gray-500 uppercase tracking-wider">Endpoints</p>
+                <span id="endpoints-count" class="text-xs font-bold bg-black text-white px-2 py-1 rounded">0</span>
+            </div>
+            <div id="endpoints-list" class="space-y-2">
+                <!-- Endpoints will be populated by JavaScript -->
+                <div class="animate-pulse">
+                    <div class="h-12 bg-gray-100 rounded mb-2"></div>
+                    <div class="h-12 bg-gray-100 rounded mb-2"></div>
+                    <div class="h-12 bg-gray-100 rounded"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="p-4 border-t border-gray-200 bg-white">
+            <div class="text-xs text-gray-500 mb-2">API Status: <span class="font-bold text-green-600">● Operational</span></div>
+            <a href="/" class="text-xs font-bold underline text-gray-500 hover:text-black transition-colors">← Back to Home</a>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content ml-0 md:ml-[300px] pt-20 px-4 md:px-8">
+        <!-- Loading State -->
+        <div id="loading-state" class="text-center py-20">
+            <div class="loading-dots inline-flex mb-4">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <h3 class="font-bold text-lg mb-2">Loading API Documentation</h3>
+            <p class="text-gray-500 text-sm">Fetching endpoints from the server...</p>
+        </div>
+        
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="hidden">
+            <div class="mb-10">
+                <h2 class="text-3xl font-extrabold uppercase tracking-tight">API Dashboard</h2>
+                <p class="text-gray-500 text-sm font-medium mt-2">Overview of all available endpoints and system status</p>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+                <div class="endpoint-card p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold text-lg">Total Endpoints</h3>
+                        <i class="fas fa-plug text-xl"></i>
+                    </div>
+                    <div class="text-3xl font-black" id="total-endpoints">0</div>
+                    <p class="text-xs text-gray-500 mt-2">Available API endpoints</p>
+                </div>
+                
+                <div class="endpoint-card p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold text-lg">Categories</h3>
+                        <i class="fas fa-folder text-xl"></i>
+                    </div>
+                    <div class="text-3xl font-black" id="total-categories">0</div>
+                    <p class="text-xs text-gray-500 mt-2">Grouped by functionality</p>
+                </div>
+                
+                <div class="endpoint-card p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold text-lg">System Status</h3>
+                        <i class="fas fa-server text-xl"></i>
+                    </div>
+                    <div class="text-3xl font-black">Operational</div>
+                    <p class="text-xs text-gray-500 mt-2">All systems normal</p>
+                </div>
+            </div>
+            
+            <!-- Quick Access -->
+            <div class="mb-10">
+                <h3 class="font-bold text-xl mb-5">Quick Access</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <button id="browse-all-btn" class="endpoint-card p-5 text-left hover:shadow-lg transition-shadow">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-black text-white flex items-center justify-center rounded">
+                                <i class="fas fa-list text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Browse All Endpoints</h4>
+                                <p class="text-sm text-gray-500 mt-1">Explore all available API endpoints</p>
+                            </div>
+                        </div>
+                    </button>
+                    
+                    <button id="quick-test-btn" class="endpoint-card p-5 text-left hover:shadow-lg transition-shadow">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-black text-white flex items-center justify-center rounded">
+                                <i class="fas fa-rocket text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Quick Test</h4>
+                                <p class="text-sm text-gray-500 mt-1">Test the first API endpoint</p>
+                            </div>
+                        </div>
+                    </button>
+                    
+                    <!-- TAMBAHKAN KARTU STATUS PAGE INI -->
+                    <button id="status-page-quick-btn" class="endpoint-card p-5 text-left hover:shadow-lg transition-shadow">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-green-600 text-white flex items-center justify-center rounded">
+                                <i class="fas fa-chart-line text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Status Page</h4>
+                                <p class="text-sm text-gray-500 mt-1">Monitor server performance</p>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Recent Endpoints -->
+            <div>
+                <h3 class="font-bold text-xl mb-5">Recently Added</h3>
+                <div id="recent-endpoints" class="space-y-4">
+                    <!-- Will be populated -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Category View -->
+        <div id="category-view" class="hidden">
+            <div class="mb-8">
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="method-badge method-get">GET</span>
+                    <span class="method-badge method-post">POST</span>
+                    <span class="method-badge method-put">PUT</span>
+                    <span class="method-badge method-delete">DELETE</span>
+                    <span class="method-badge method-patch">PATCH</span>
+                </div>
+                <h2 id="category-title" class="text-3xl font-extrabold uppercase tracking-tight">All Endpoints</h2>
+                <p id="category-description" class="text-sm text-gray-500 mt-2"></p>
+            </div>
+            
+            <div id="endpoints-container" class="space-y-6">
+                <!-- Endpoints will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Endpoint Detail View -->
+        <div id="endpoint-detail-view" class="hidden">
+            <!-- Endpoint Header -->
+            <div class="mb-8">
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <span id="detail-method" class="method-badge method-get">GET</span>
+                    <code id="detail-endpoint" class="code-font text-xl font-bold bg-gray-100 px-4 py-2 rounded border border-black"></code>
+                </div>
+                <h2 id="detail-title" class="text-3xl font-extrabold uppercase tracking-tight mb-3"></h2>
+                <div class="flex items-center gap-3 mb-5">
+                    <span id="detail-category" class="text-xs font-bold bg-gray-100 px-3 py-1.5 rounded border border-black"></span>
+                    <div id="detail-tags" class="flex gap-2"></div>
+                </div>
+                <div class="endpoint-card p-6">
+                    <p id="detail-description" class="text-gray-700 text-base"></p>
+                </div>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="mb-8 border-b-2 border-black">
+                <div class="flex space-x-8 overflow-x-auto">
+                    <button class="tab-btn active py-4 px-1 font-bold text-black text-sm border-b-2 border-black" data-tab="tester">
+                        <i class="fas fa-play mr-2"></i>API Tester
+                    </button>
+                    <button class="tab-btn py-4 px-1 font-bold text-gray-500 hover:text-black text-sm" data-tab="docs">
+                        <i class="fas fa-book mr-2"></i>Documentation
+                    </button>
+                    <button class="tab-btn py-4 px-1 font-bold text-gray-500 hover:text-black text-sm" data-tab="examples">
+                        <i class="fas fa-code mr-2"></i>Examples
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tab Content -->
+            <div>
+                <!-- API Tester -->
+                <div id="tester-tab" class="tab-content">
+                    <div class="endpoint-card p-6 mb-6">
+                        <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <i class="fas fa-sliders-h"></i> Parameters
+                        </h4>
+                        <div id="parameters-container" class="space-y-4">
+                            <!-- Parameters will be loaded here -->
+                        </div>
+                        
+                        <!-- NEW: File Upload Section (for POST/PUT/PATCH methods) -->
+                        <div id="file-upload-section" class="hidden mt-6">
+                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <i class="fas fa-upload"></i> File Upload
+                            </h4>
+                            <div id="file-upload-area" class="file-upload-area">
+                                <div class="mb-4">
+                                    <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                    <p class="font-bold">Drop files here or click to upload</p>
+                                    <p class="text-sm text-gray-500 mt-1">Supports images, videos, audio, documents</p>
+                                </div>
+                                <input type="file" id="file-input" multiple class="hidden">
+                                <button id="browse-files-btn" class="btn-secondary px-4 py-2 rounded">
+                                    <i class="fas fa-folder-open mr-2"></i>Browse Files
+                                </button>
+                            </div>
+                            <div id="file-list" class="file-list"></div>
+                        </div>
+                    </div>
+                    
+                    <button id="execute-btn" class="btn-primary w-full py-4 rounded text-sm font-bold mb-6">
+                        <i class="fas fa-bolt mr-2"></i>EXECUTE REQUEST
+                    </button>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-lg flex items-center gap-2">
+                                <i class="fas fa-reply"></i> Response
+                            </h4>
+                            <div class="flex items-center gap-3">
+                                <span id="response-time" class="text-xs text-gray-500 code-font"></span>
+                                <button id="copy-response" class="btn-secondary p-2 rounded">
+                                    <i class="fas fa-copy text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- RESPONSE AREA - MENAMPILKAN SEMUA JENIS RESPONSE -->
+                        <div class="relative">
+                            <div id="response-area" class="response-block p-6 min-h-72 overflow-auto">
+                                <!-- Response akan ditampilkan di sini sesuai tipenya -->
+                                <div class="text-center py-12 text-gray-400">
+                                    <i class="fas fa-arrow-up text-3xl mb-3"></i>
+                                    <p>Execute request to see response here</p>
+                                    <p class="text-sm mt-1">Response will be displayed based on content type</p>
+                                </div>
+                            </div>
+                            
+                            <div id="response-loader" class="hidden absolute inset-0 bg-white/95 flex items-center justify-center">
+                                <div class="text-center">
+                                    <div class="loading-dots mb-3">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                    <p class="text-sm font-bold">Sending request...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Response Status dan Info -->
+                        <div id="response-status-container" class="hidden">
+                            <div class="flex items-center gap-2 mt-3">
+                                <span class="text-xs font-bold">Status:</span>
+                                <span id="response-status" class="text-xs font-bold px-3 py-1 rounded border border-black code-font"></span>
+                                <span class="text-xs text-gray-500">•</span>
+                                <span id="response-size" class="text-xs text-gray-500 code-font"></span>
+                                <span class="text-xs text-gray-500">•</span>
+                                <span id="response-type" class="text-xs text-gray-500 code-font"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- HEADERS SECTION - TAMPILAN TABEL YANG BAGUS -->
+                        <div id="headers-section" class="headers-section hidden">
+                            <h5 class="headers-title">
+                                <i class="fas fa-heading"></i> Response Headers
+                            </h5>
+                            
+                            <!-- PILIH SALAH SATU STYLE DI BAWAH INI -->
+                            
+                            <!-- OPTION 1: TABEL STYLE (seperti di documentation) -->
+                            <div class="headers-table-container">
+                                <table class="headers-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Header Name</th>
+                                            <th>Header Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="headers-table-body">
+                                        <!-- Headers akan ditampilkan di sini -->
+                                    </tbody>
+                                </table>
+                                <div id="no-headers-message" class="no-headers hidden">
+                                    <i class="fas fa-info-circle text-2xl mb-2"></i>
+                                    <p>No headers available</p>
+                                </div>
+                            </div>
+                            
+                            <!-- OPTION 2: CARD STYLE (uncomment jika ingin pakai ini) -->
+                            <!--
+                            <div class="headers-card">
+                                <div class="headers-card-header">
+                                    <i class="fas fa-heading"></i>
+                                    Response Headers
+                                </div>
+                                <div class="headers-card-body" id="headers-card-body">
+                                    
+                                </div>
+                                <div id="no-headers-card" class="no-headers hidden">
+                                    <i class="fas fa-info-circle text-2xl mb-2"></i>
+                                    <p>No headers available</p>
+                                </div>
+                            </div>
+                            -->
+                        </div>
+                        
+                        <!-- cURL Command -->
+                        <div class="endpoint-card p-5 mt-8">
+                            <div class="flex items-center justify-between mb-3">
+                                <h5 class="font-bold text-lg flex items-center gap-2">
+                                    <i class="fas fa-terminal"></i> cURL Command
+                                </h5>
+                                <button id="copy-curl" class="btn-secondary text-xs px-3 py-1.5 rounded">
+                                    <i class="fas fa-copy mr-1"></i> Copy
+                                </button>
+                            </div>
+                            <pre id="curl-area" class="code-block p-4 text-sm overflow-x-auto">// cURL command will appear here</pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Documentation -->
+                <div id="docs-tab" class="tab-content hidden">
+                    <div class="space-y-6">
+                        <div class="endpoint-card p-6">
+                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <i class="fas fa-paper-plane"></i> Request Details
+                            </h4>
+                            <div id="request-details" class="space-y-3">
+                                <!-- Will be populated -->
+                            </div>
+                        </div>
+                        
+                        <div class="endpoint-card p-6">
+                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <i class="fas fa-reply-all"></i> Response Details
+                            </h4>
+                            <div id="response-details" class="space-y-3">
+                                <!-- Will be populated -->
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <i class="fas fa-list-ol"></i> Status Codes
+                            </h4>
+                            <div class="overflow-hidden border-2 border-black">
+                                <table class="w-full">
+                                    <thead class="bg-black text-white">
+                                        <tr>
+                                            <th class="py-3 px-4 text-left text-sm font-bold code-font">Code</th>
+                                            <th class="py-3 px-4 text-left text-sm font-bold">Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="status-codes-list" class="divide-y divide-gray-200">
+                                        <!-- Will be populated -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Examples -->
+                <div id="examples-tab" class="tab-content hidden">
+                    <div class="space-y-6">
+                        <div class="endpoint-card p-6">
+                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <i class="fas fa-code"></i> Code Examples
+                            </h4>
+                            <div class="space-y-5">
+                                <div>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h5 class="font-bold text-sm flex items-center gap-2">
+                                            <i class="fab fa-js text-yellow-500"></i> JavaScript (Fetch)
+                                        </h5>
+                                        <button class="copy-code-btn btn-secondary text-xs px-3 py-1.5 rounded" data-lang="js">
+                                            <i class="fas fa-copy mr-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <pre id="js-example" class="code-block p-4 text-sm overflow-x-auto">// JavaScript example will appear here</pre>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h5 class="font-bold text-sm flex items-center gap-2">
+                                            <i class="fab fa-python text-blue-500"></i> Python (Requests)
+                                        </h5>
+                                        <button class="copy-code-btn btn-secondary text-xs px-3 py-1.5 rounded" data-lang="python">
+                                            <i class="fas fa-copy mr-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <pre id="python-example" class="code-block p-4 text-sm overflow-x-auto"># Python example will appear here</pre>
+                                </div>
+                                
+                                <!-- NEW: File Upload Examples -->
+                                <div>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h5 class="font-bold text-sm flex items-center gap-2">
+                                            <i class="fas fa-upload text-purple-500"></i> File Upload Example
+                                        </h5>
+                                        <button class="copy-code-btn btn-secondary text-xs px-3 py-1.5 rounded" data-lang="upload">
+                                            <i class="fas fa-copy mr-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <pre id="upload-example" class="code-block p-4 text-sm overflow-x-auto">// File upload example will appear here</pre>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="endpoint-card p-6">
+                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <i class="fas fa-lightbulb"></i> Notes & Tips
+                            </h4>
+                            <div id="notes-container" class="space-y-3 text-sm">
+                                <!-- Will be populated -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Data API
+        let allEndpoints = [];
+        let activeCategory = 'all';
+        let selectedEndpointId = null;
+        let currentDomain = window.location.origin;
+        let uploadedFiles = [];
+        
+        // DOM Elements
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebarClose = document.getElementById('sidebar-close');
+        const searchInput = document.getElementById('search-input');
+        const categoriesCount = document.getElementById('categories-count');
+        const endpointsCount = document.getElementById('endpoints-count');
+        const totalEndpointsEl = document.getElementById('total-endpoints');
+        const totalCategoriesEl = document.getElementById('total-categories');
+        
+        // View elements
+        const loadingState = document.getElementById('loading-state');
+        const dashboardView = document.getElementById('dashboard-view');
+        const categoryView = document.getElementById('category-view');
+        const endpointDetailView = document.getElementById('endpoint-detail-view');
+        
+        // Utility functions
+        function getMethodStyle(method) {
+            const methodMap = {
+                'GET': { class: 'method-get', color: '#000' },
+                'POST': { class: 'method-post', color: '#000' },
+                'PUT': { class: 'method-put', color: '#000' },
+                'DELETE': { class: 'method-delete', color: '#000' },
+                'PATCH': { class: 'method-patch', color: '#000' }
+            };
+            return methodMap[method] || { class: 'bg-gray-800 text-white', color: '#6b7280' };
+        }
+        
+        // Function untuk syntax highlighting JSON
+        function syntaxHighlight(json) {
+            if (typeof json !== 'string') {
+                json = JSON.stringify(json, null, 2);
+            }
+            
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                let cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+        
+        // NEW: Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // NEW: Get file icon class
+        function getFileIconClass(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+            const videoExts = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm'];
+            const audioExts = ['mp3', 'wav', 'ogg', 'flac', 'm4a'];
+            const pdfExts = ['pdf'];
+            
+            if (imageExts.includes(ext)) return 'fas fa-file-image text-blue-500';
+            if (videoExts.includes(ext)) return 'fas fa-file-video text-purple-500';
+            if (audioExts.includes(ext)) return 'fas fa-file-audio text-green-500';
+            if (pdfExts.includes(ext)) return 'fas fa-file-pdf text-red-500';
+            if (ext === 'doc' || ext === 'docx') return 'fas fa-file-word text-blue-600';
+            if (ext === 'xls' || ext === 'xlsx') return 'fas fa-file-excel text-green-600';
+            if (ext === 'ppt' || ext === 'pptx') return 'fas fa-file-powerpoint text-orange-600';
+            if (ext === 'txt') return 'fas fa-file-alt text-gray-500';
+            if (ext === 'zip' || ext === 'rar' || ext === '7z') return 'fas fa-file-archive text-yellow-600';
+            
+            return 'fas fa-file text-gray-400';
+        }
+        
+        // NEW: Render uploaded files list
+        function renderUploadedFiles() {
+            const fileList = document.getElementById('file-list');
+            if (uploadedFiles.length === 0) {
+                fileList.innerHTML = '';
+                return;
+            }
+            
+            fileList.innerHTML = uploadedFiles.map((file, index) => `
+                <div class="file-item">
+                    <i class="${getFileIconClass(file.name)}"></i>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${formatFileSize(file.size)}</div>
+                    </div>
+                    <i class="fas fa-times remove-file" onclick="removeUploadedFile(${index})"></i>
+                </div>
+            `).join('');
+        }
+        
+        // NEW: Remove uploaded file
+        function removeUploadedFile(index) {
+            uploadedFiles.splice(index, 1);
+            renderUploadedFiles();
+        }
+        
+        // NEW: Render response headers dengan tabel yang bagus
+        function renderResponseHeaders(headers) {
+            const tableBody = document.getElementById('headers-table-body');
+            const noHeadersMessage = document.getElementById('no-headers-message');
+            const headersSection = document.getElementById('headers-section');
+            
+            // Clear previous headers
+            tableBody.innerHTML = '';
+            
+            if (!headers || headers.entries().next().done) {
+                tableBody.classList.add('hidden');
+                noHeadersMessage.classList.remove('hidden');
+                headersSection.classList.add('hidden');
+                return;
+            }
+            
+            let headersArray = [];
+            for (const [key, value] of headers.entries()) {
+                headersArray.push({ key, value });
+            }
+            
+            // Sort headers alphabetically
+            headersArray.sort((a, b) => a.key.localeCompare(b.key));
+            
+            // Render headers
+            headersArray.forEach(header => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="header-name-cell">${header.key}</td>
+                    <td class="header-value-cell">${header.value}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            tableBody.classList.remove('hidden');
+            noHeadersMessage.classList.add('hidden');
+            headersSection.classList.remove('hidden');
+            
+            // ALTERNATIVE: Jika ingin menggunakan card style (uncomment jika mau)
+            /*
+            const cardBody = document.getElementById('headers-card-body');
+            const noHeadersCard = document.getElementById('no-headers-card');
+            
+            cardBody.innerHTML = '';
+            
+            if (!headers || headers.entries().next().done) {
+                cardBody.classList.add('hidden');
+                noHeadersCard.classList.remove('hidden');
+                headersSection.classList.add('hidden');
+                return;
+            }
+            
+            let cardHtml = '';
+            headersArray.forEach(header => {
+                cardHtml += `
+                    <div class="header-row">
+                        <div class="header-label">${header.key}</div>
+                        <div class="header-value">${header.value}</div>
+                    </div>
+                `;
+            });
+            
+            cardBody.innerHTML = cardHtml;
+            cardBody.classList.remove('hidden');
+            noHeadersCard.classList.add('hidden');
+            headersSection.classList.remove('hidden');
+            */
+        }
+        
+        // NEW: Render response berdasarkan tipe
+        function renderResponse(contentType, data, headers) {
+            const responseArea = document.getElementById('response-area');
+            
+            // Clear previous response
+            responseArea.innerHTML = '';
+            
+            if (contentType.includes('application/json')) {
+                // JSON response
+                if (typeof data === 'object' && data !== null) {
+                    responseArea.innerHTML = `<pre>${syntaxHighlight(JSON.stringify(data, null, 2))}</pre>`;
+                } else {
+                    responseArea.innerHTML = `<div class="text-response">${data}</div>`;
+                }
+            } 
+            else if (contentType.startsWith('image/')) {
+                // Image response
+                const url = URL.createObjectURL(data);
+                responseArea.innerHTML = `
+                    <div class="media-preview">
+                        <img src="${url}" alt="Image response" onload="URL.revokeObjectURL(this.src)">
+                        <div class="media-info">
+                            <p><strong>Type:</strong> ${contentType}</p>
+                            <p><strong>Size:</strong> ${formatFileSize(data.size)}</p>
+                            <a href="${url}" download="image.png" class="download-btn mt-2">
+                                <i class="fas fa-download"></i> Download Image
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (contentType.startsWith('video/')) {
+                // Video response
+                const url = URL.createObjectURL(data);
+                responseArea.innerHTML = `
+                    <div class="media-preview">
+                        <video controls class="w-full">
+                            <source src="${url}" type="${contentType}">
+                            Your browser does not support the video tag.
+                        </video>
+                        <div class="media-info">
+                            <p><strong>Type:</strong> ${contentType}</p>
+                            <p><strong>Size:</strong> ${formatFileSize(data.size)}</p>
+                            <a href="${url}" download="video.mp4" class="download-btn mt-2">
+                                <i class="fas fa-download"></i> Download Video
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (contentType.startsWith('audio/')) {
+                // Audio response
+                const url = URL.createObjectURL(data);
+                responseArea.innerHTML = `
+                    <div class="media-preview">
+                        <audio controls class="w-full">
+                            <source src="${url}" type="${contentType}">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <div class="media-info">
+                            <p><strong>Type:</strong> ${contentType}</p>
+                            <p><strong>Size:</strong> ${formatFileSize(data.size)}</p>
+                            <a href="${url}" download="audio.mp3" class="download-btn mt-2">
+                                <i class="fas fa-download"></i> Download Audio
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (contentType === 'application/pdf' || contentType.includes('pdf')) {
+                // PDF response
+                const url = URL.createObjectURL(data);
+                responseArea.innerHTML = `
+                    <div class="media-preview">
+                        <div class="text-center py-8">
+                            <i class="fas fa-file-pdf text-6xl text-red-500 mb-4"></i>
+                            <p class="font-bold text-lg">PDF Document</p>
+                            <p class="text-gray-500">${formatFileSize(data.size)}</p>
+                            <div class="mt-4">
+                                <a href="${url}" download="document.pdf" class="download-btn">
+                                    <i class="fas fa-download"></i> Download PDF
+                                </a>
+                                <a href="${url}" target="_blank" class="download-btn ml-2 bg-blue-500">
+                                    <i class="fas fa-external-link-alt"></i> Open in New Tab
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (contentType.includes('text/')) {
+                // Text response
+                responseArea.innerHTML = `<div class="text-response">${data}</div>`;
+            }
+            else {
+                // Unknown/binary response
+                if (data instanceof Blob) {
+                    const url = URL.createObjectURL(data);
+                    responseArea.innerHTML = `
+                        <div class="text-center py-8">
+                            <i class="fas fa-file text-6xl text-gray-500 mb-4"></i>
+                            <p class="font-bold text-lg">Binary File</p>
+                            <p class="text-gray-500">${contentType} • ${formatFileSize(data.size)}</p>
+                            <div class="mt-4">
+                                <a href="${url}" download="file.bin" class="download-btn">
+                                    <i class="fas fa-download"></i> Download File
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    responseArea.innerHTML = `<div class="text-response">${data}</div>`;
+                }
+            }
+        }
+        
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            // Update icon
+            const icon = sidebarToggle.querySelector('i');
+            if (sidebar.classList.contains('active')) {
+                icon.className = 'fas fa-times text-base';
+            } else {
+                icon.className = 'fas fa-bars text-base';
+            }
+        }
+        
+        function closeSidebar() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            sidebarToggle.querySelector('i').className = 'fas fa-bars text-base';
+        }
+        
+        function showDashboard() {
+            loadingState.classList.add('hidden');
+            dashboardView.classList.remove('hidden');
+            categoryView.classList.add('hidden');
+            endpointDetailView.classList.add('hidden');
+            updateStats();
+            updateNavLinks('dashboard');
+            
+            // Close sidebar on mobile
+            if (window.innerWidth < 768) {
+                closeSidebar();
+            }
+        }
+        
+        function showCategory(category) {
+            activeCategory = category;
+            loadingState.classList.add('hidden');
+            dashboardView.classList.add('hidden');
+            categoryView.classList.remove('hidden');
+            endpointDetailView.classList.add('hidden');
+            
+            const filtered = category === 'all' 
+                ? allEndpoints 
+                : allEndpoints.filter(api => (api.kategori || 'General') === category);
+            
+            const categoryTitle = document.getElementById('category-title');
+            const categoryDesc = document.getElementById('category-description');
+            
+            if (category === 'all') {
+                categoryTitle.textContent = 'All Endpoints';
+                categoryDesc.textContent = `${filtered.length} endpoints available`;
+            } else {
+                categoryTitle.textContent = category;
+                categoryDesc.textContent = `${filtered.length} endpoints in this category`;
+            }
+            
+            renderCategoryEndpoints(filtered);
+            updateNavLinks('category');
+            
+            // Close sidebar on mobile
+            if (window.innerWidth < 768) {
+                closeSidebar();
+            }
+        }
+        
+        function showEndpointDetail(endpointId) {
+            const endpoint = allEndpoints.find(e => e.id === endpointId);
+            if (!endpoint) return;
+            
+            selectedEndpointId = endpointId;
+            loadingState.classList.add('hidden');
+            dashboardView.classList.add('hidden');
+            categoryView.classList.add('hidden');
+            endpointDetailView.classList.remove('hidden');
+            
+            renderEndpointDetail(endpoint);
+            updateNavLinks('endpoint');
+            
+            // Close sidebar on mobile
+            if (window.innerWidth < 768) {
+                closeSidebar();
+            }
+        }
+        
+        function showFirstEndpoint() {
+            if (allEndpoints.length > 0) {
+                showEndpointDetail(allEndpoints[0].id);
+            }
+        }
+        
+        function updateNavLinks(activeView) {
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => link.classList.remove('active'));
+            
+            if (activeView === 'dashboard') {
+                document.querySelector('.nav-link[data-view="dashboard"]').classList.add('active');
+            } else if (activeView === 'category') {
+                document.querySelector('.nav-link[data-view="category-all"]').classList.add('active');
+            }
+        }
+        
+        function renderCategoryEndpoints(endpoints) {
+            const container = document.getElementById('endpoints-container');
+            
+            if (endpoints.length === 0) {
+                container.innerHTML = `
+                    <div class="endpoint-card p-8 text-center">
+                        <i class="fas fa-inbox text-3xl mb-3 text-gray-400"></i>
+                        <h3 class="font-bold text-lg mb-2">No Endpoints Found</h3>
+                        <p class="text-gray-500 text-sm">Try selecting a different category</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = endpoints.map(endpoint => {
+                const methodStyle = getMethodStyle(endpoint.method);
+                
+                return `
+                    <div class="endpoint-card p-5 cursor-pointer" onclick="showEndpointDetail('${endpoint.id}')">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="${methodStyle.class} method-badge">${endpoint.method}</span>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2">${endpoint.nama}</h3>
+                        <p class="text-gray-600 text-sm mb-3">${endpoint.deskripsi.substring(0, 100)}...</p>
+                        <div class="flex items-center justify-between text-xs">
+                            <code class="code-font text-gray-500 bg-gray-100 px-2 py-1 rounded">${endpoint.endpoint}</code>
+                            <span class="bg-gray-100 px-3 py-1 rounded border border-gray-300">${endpoint.kategori || 'General'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderEndpointDetail(endpoint) {
+            const methodStyle = getMethodStyle(endpoint.method);
+            
+            // Update header
+            document.getElementById('detail-method').className = `method-badge ${methodStyle.class}`;
+            document.getElementById('detail-method').textContent = endpoint.method;
+            document.getElementById('detail-endpoint').textContent = endpoint.endpoint;
+            document.getElementById('detail-title').textContent = endpoint.nama;
+            document.getElementById('detail-category').textContent = endpoint.kategori || 'General';
+            document.getElementById('detail-description').textContent = endpoint.deskripsi;
+            
+            // Update tags
+            const tagsContainer = document.getElementById('detail-tags');
+            if (endpoint.tags && endpoint.tags.length > 0) {
+                tagsContainer.innerHTML = endpoint.tags.map(tag => 
+                    `<span class="text-xs bg-gray-100 px-3 py-1 rounded border border-gray-300">${tag}</span>`
+                ).join(' ');
+            } else {
+                tagsContainer.innerHTML = '';
+            }
+            
+            // Show/hide file upload section based on method
+            const uploadSection = document.getElementById('file-upload-section');
+            if (endpoint.method === 'POST' || endpoint.method === 'PUT' || endpoint.method === 'PATCH') {
+                uploadSection.classList.remove('hidden');
+            } else {
+                uploadSection.classList.add('hidden');
+            }
+            
+            // Reset uploaded files
+            uploadedFiles = [];
+            renderUploadedFiles();
+            
+            // Render parameters
+            renderParameters(endpoint);
+            
+            // Update documentation
+            renderDocumentation(endpoint);
+            
+            // Update examples
+            renderExamples(endpoint);
+            
+            // Setup event listeners
+            setupEndpointEvents(endpoint);
+        }
+        
+        function renderParameters(endpoint) {
+            const container = document.getElementById('parameters-container');
+            
+            if (endpoint.parameter && endpoint.parameter.length > 0) {
+                container.innerHTML = endpoint.parameter.map(param => `
+                    <div class="space-y-2 p-3 border border-gray-200 rounded">
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-bold flex items-center gap-1">
+                                ${param.nama}
+                                ${param.required ? '<span class="text-red-500">*</span>' : ''}
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs code-font bg-gray-100 px-2 py-1 rounded border">${param.tipe || 'string'}</span>
+                                <span class="text-xs px-2 py-1 rounded ${param.required ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-gray-100 text-gray-600 border'}">
+                                    ${param.required ? 'required' : 'optional'}
+                                </span>
+                            </div>
+                        </div>
+                        <input type="${param.tipe === 'number' ? 'number' : 'text'}" 
+                               class="param-input input-field w-full px-3 py-2.5 rounded text-sm code-font"
+                               data-param="${param.nama}"
+                               placeholder="${param.contoh || (param.tipe === 'number' ? 'Enter number...' : 'Enter value...')}"
+                               ${param.required ? 'required' : ''}>
+                        ${param.deskripsi ? `
+                            <p class="text-xs text-gray-500"><i class="fas fa-info-circle mr-1"></i>${param.deskripsi}</p>
+                        ` : ''}
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = `
+                    <div class="text-center py-6 border border-gray-200 rounded">
+                        <i class="fas fa-check text-green-500 text-xl mb-2"></i>
+                        <p class="font-bold text-sm">No parameters required</p>
+                        <p class="text-gray-500 text-xs mt-1">This endpoint can be called without any parameters</p>
+                    </div>
+                `;
+            }
+            
+            // Update cURL command
+            updateCurlCommand(endpoint);
+        }
+        
+        function updateCurlCommand(endpoint) {
+            const paramInputs = document.querySelectorAll('.param-input');
+            let path = endpoint.endpoint;
+            const params = {};
+            
+            paramInputs.forEach(input => {
+                const name = input.dataset.param;
+                const value = input.value.trim();
+                
+                if (value) {
+                    params[name] = value;
+                }
+            });
+            
+            let fullUrl = `${currentDomain}${path}`;
+            
+            if (endpoint.method === 'GET' && Object.keys(params).length > 0) {
+                const query = new URLSearchParams(params).toString();
+                fullUrl += '?' + query;
+            }
+            
+            let curl = `curl -X ${endpoint.method} \\\n`;
+            
+            if (endpoint.method === 'POST' || endpoint.method === 'PUT' || endpoint.method === 'PATCH') {
+                curl += `  -H "Content-Type: application/json" \\\n`;
+            }
+            
+            curl += `  "${fullUrl}"`;
+            
+            if ((endpoint.method === 'POST' || endpoint.method === 'PUT' || endpoint.method === 'PATCH') && Object.keys(params).length > 0) {
+                curl += ` \\\n  -d '${JSON.stringify(params)}'`;
+            }
+            
+            curl += ` \\\n  -H "Accept: application/json"`;
+            
+            // Add file upload to curl if files exist
+            if (uploadedFiles.length > 0 && (endpoint.method === 'POST' || endpoint.method === 'PUT' || endpoint.method === 'PATCH')) {
+                curl = `curl -X ${endpoint.method} \\\n`;
+                uploadedFiles.forEach((file, index) => {
+                    curl += `  -F "file${index + 1}=@${file.name}" \\\n`;
+                });
+                curl += `  "${fullUrl}"`;
+            }
+            
+            document.getElementById('curl-area').textContent = curl;
+            
+            // Update examples
+            updateExamples(endpoint, fullUrl, params);
+        }
+        
+        function updateExamples(endpoint, fullUrl, params) {
+            // JavaScript example
+            let jsParams = '';
+            let jsBody = '';
+            
+            if (endpoint.parameter && endpoint.parameter.length > 0) {
+                if (endpoint.method === 'GET') {
+                    jsParams = `const params = new URLSearchParams({\n${endpoint.parameter.map(p => `  '${p.nama}': '${params[p.nama] || 'value'}'`).join(',\n')}\n});`;
+                } else {
+                    jsParams = `const data = {\n${endpoint.parameter.map(p => `  '${p.nama}': '${params[p.nama] || 'value'}'`).join(',\n')}\n};`;
+                    jsBody = `  body: JSON.stringify(data),`;
+                }
+            }
+            
+            const jsExample = `// Using Fetch API\n${jsParams ? `${jsParams}\n\n` : ''}async function fetchData() {\n  try {\n    const response = await fetch('${fullUrl}', {\n      method: '${endpoint.method}',${endpoint.method !== 'GET' ? `\n      headers: {\n        'Content-Type': 'application/json',\n        'Accept': 'application/json'\n      },` : `\n      headers: {\n        'Accept': 'application/json'\n      },`}\n${jsBody ? `${jsBody}\n` : ''}    });\n    \n    if (!response.ok) {\n      throw new Error(\`HTTP \${response.status}: \${response.statusText}\`);\n    }\n    \n    const result = await response.json();\n    console.log('Success:', result);\n    return result;\n  } catch (error) {\n    console.error('Error:', error);\n    throw error;\n  }\n}\n\n// Call the function\nfetchData();`;
+            
+            document.getElementById('js-example').textContent = jsExample;
+            
+            // Python example
+            let pythonParams = '';
+            let pythonPayload = '';
+            
+            if (endpoint.parameter && endpoint.parameter.length > 0) {
+                if (endpoint.method === 'GET') {
+                    pythonParams = `params = {\n${endpoint.parameter.map(p => `    '${p.nama}': '${params[p.nama] || 'value'}'`).join(',\n')}\n}`;
+                    pythonPayload = `params=params`;
+                } else {
+                    pythonParams = `payload = {\n${endpoint.parameter.map(p => `    '${p.nama}': '${params[p.nama] || 'value'}'`).join(',\n')}\n}`;
+                    pythonPayload = `json=payload`;
+                }
+            }
+            
+            const pythonExample = `import requests\nimport json\n\n${pythonParams ? `${pythonParams}\n\n` : ''}url = '${fullUrl}'\nheaders = {\n    'Accept': 'application/json'${endpoint.method !== 'GET' ? ",\n    'Content-Type': 'application/json'" : ''}\n}\n\ntry:\n    response = requests.${endpoint.method.toLowerCase()}(${pythonPayload ? `\n        url, \n        ${pythonPayload}, ` : `\n        url, `}\n        headers=headers\n    )\n    response.raise_for_status()\n    \n    data = response.json()\n    print(json.dumps(data, indent=2))\n    \nexcept requests.exceptions.RequestException as e:\n    print(f"Error: {e}")\n    if hasattr(e, 'response') and e.response is not None:\n        print(f"Status Code: {e.response.status_code}")\n        print(f"Response: {e.response.text}")`;
+            
+            document.getElementById('python-example').textContent = pythonExample;
+            
+            // NEW: File upload example
+            let uploadExample = '';
+            if (uploadedFiles.length > 0 && (endpoint.method === 'POST' || endpoint.method === 'PUT' || endpoint.method === 'PATCH')) {
+                uploadExample = `// JavaScript with FormData for file upload\nasync function uploadFiles() {\n  const formData = new FormData();\n  \n  // Add regular parameters\n${endpoint.parameter && endpoint.parameter.length > 0 ? endpoint.parameter.map(p => `  formData.append('${p.nama}', '${params[p.nama] || 'value'}');`).join('\n') : ''}\n  \n  // Add files\n  const fileInput = document.getElementById('file-input');\n  for (let i = 0; i < fileInput.files.length; i++) {\n    formData.append('files[]', fileInput.files[i]);\n  }\n  \n  try {\n    const response = await fetch('${fullUrl}', {\n      method: '${endpoint.method}',\n      body: formData\n      // Note: Don't set Content-Type header when using FormData\n      // Browser will set it automatically with boundary\n    });\n    \n    if (!response.ok) {\n      throw new Error(\`HTTP \${response.status}: \${response.statusText}\`);\n    }\n    \n    const result = await response.json();\n    console.log('Upload successful:', result);\n    return result;\n  } catch (error) {\n    console.error('Upload failed:', error);\n    throw error;\n  }\n}\n\n// Python with files\nimport requests\n\nurl = '${fullUrl}'\nfiles = {}\n${uploadedFiles.map((file, i) => `files['file${i + 1}'] = open('${file.name}', 'rb')`).join('\n')}\n\ntry:\n    response = requests.${endpoint.method.toLowerCase()}(url, files=files)\n    response.raise_for_status()\n    print(response.json())\nexcept Exception as e:\n    print(f"Error: {e}")`;
+            } else {
+                uploadExample = `// File upload example will appear here when you add files`;
+            }
+            
+            document.getElementById('upload-example').textContent = uploadExample;
+        }
+        
+        function renderDocumentation(endpoint) {
+            // Request details
+            const requestDetails = document.getElementById('request-details');
+            requestDetails.innerHTML = `
+                <div class="flex items-start gap-3 p-3 border border-gray-200 rounded">
+                    <i class="fas fa-link text-gray-400 mt-0.5"></i>
+                    <div>
+                        <div class="font-bold text-sm mb-1">Endpoint URL</div>
+                        <div class="text-sm code-font bg-gray-100 p-2 rounded border">${currentDomain}${endpoint.endpoint}</div>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 p-3 border border-gray-200 rounded">
+                    <i class="fas fa-exchange-alt text-gray-400 mt-0.5"></i>
+                    <div>
+                        <div class="font-bold text-sm mb-1">HTTP Method</div>
+                        <div class="text-sm">
+                            <span class="${getMethodStyle(endpoint.method).class} method-badge">${endpoint.method}</span>
+                        </div>
+                    </div>
+                </div>
+                ${endpoint.parameter && endpoint.parameter.length > 0 ? `
+                    <div class="flex items-start gap-3 p-3 border border-gray-200 rounded">
+                        <i class="fas fa-list text-gray-400 mt-0.5"></i>
+                        <div>
+                            <div class="font-bold text-sm mb-1">Parameters</div>
+                            <div class="text-sm space-y-1">
+                                ${endpoint.parameter.map(p => `
+                                    <div><span class="code-font">${p.nama}</span> <span class="text-gray-500">(${p.tipe || 'string'})</span> ${p.required ? '<span class="text-red-500 text-xs">required</span>' : '<span class="text-gray-500 text-xs">optional</span>'}</div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+                ${endpoint.method === 'POST' || endpoint.method === 'PUT' || endpoint.method === 'PATCH' ? `
+                    <div class="flex items-start gap-3 p-3 border border-gray-200 rounded">
+                        <i class="fas fa-upload text-gray-400 mt-0.5"></i>
+                        <div>
+                            <div class="font-bold text-sm mb-1">File Upload Support</div>
+                            <div class="text-sm">
+                                <p>This endpoint supports file uploads. You can upload:</p>
+                                <ul class="list-disc pl-5 mt-1 space-y-1">
+                                    <li>Images (JPEG, PNG, GIF, WebP, SVG)</li>
+                                    <li>Videos (MP4, AVI, MOV, WebM)</li>
+                                    <li>Audio (MP3, WAV, OGG)</li>
+                                    <li>Documents (PDF, DOC, TXT)</li>
+                                    <li>Other file types</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+            
+            // Status codes
+            const statusCodes = [
+                { code: 200, desc: "OK - Request successful" },
+                { code: 201, desc: "Created - Resource created successfully" },
+                { code: 400, desc: "Bad Request - Invalid parameters" },
+                { code: 401, desc: "Unauthorized - Authentication required" },
+                { code: 403, desc: "Forbidden - Access denied" },
+                { code: 404, desc: "Not Found - Resource not found" },
+                { code: 500, desc: "Internal Server Error" },
+            ];
+            
+            const statusList = document.getElementById('status-codes-list');
+            statusList.innerHTML = statusCodes.map(status => `
+                <tr class="hover:bg-gray-50">
+                    <td class="py-3 px-4">
+                        <span class="code-font font-bold">${status.code}</span>
+                    </td>
+                    <td class="py-3 px-4 text-sm">${status.desc}</td>
+                </tr>
+            `).join('');
+        }
+        
+        function renderExamples(endpoint) {
+            // Notes
+            const notesContainer = document.getElementById('notes-container');
+            notesContainer.innerHTML = `
+                <div class="flex items-start gap-3 p-3 border border-blue-200 bg-blue-50 rounded">
+                    <i class="fas fa-shield-alt text-blue-500 mt-0.5"></i>
+                    <div>
+                        <p class="font-bold text-sm text-gray-900">Security</p>
+                        <p class="text-gray-600 text-xs mt-0.5">Ensure you have proper authentication if required by this endpoint.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 p-3 border border-green-200 bg-green-50 rounded">
+                    <i class="fas fa-exclamation-triangle text-green-500 mt-0.5"></i>
+                    <div>
+                        <p class="font-bold text-sm text-gray-900">Error Handling</p>
+                        <p class="text-gray-600 text-xs mt-0.5">Always handle potential errors and edge cases in your implementation.</p>
+                    </div>
+                </div>
+                ${endpoint.method === 'POST' || endpoint.method === 'PUT' || endpoint.method === 'PATCH' ? `
+                    <div class="flex items-start gap-3 p-3 border border-purple-200 bg-purple-50 rounded">
+                        <i class="fas fa-upload text-purple-500 mt-0.5"></i>
+                        <div>
+                            <p class="font-bold text-sm text-gray-900">File Upload Tips</p>
+                            <p class="text-gray-600 text-xs mt-0.5">Use FormData for file uploads. Maximum file size and allowed types depend on server configuration.</p>
+                        </div>
+                    </div>
+                ` : ''}
+                ${endpoint.parameter && endpoint.parameter.some(p => p.required) ? `
+                    <div class="flex items-start gap-3 p-3 border border-red-200 bg-red-50 rounded">
+                        <i class="fas fa-asterisk text-red-500 mt-0.5"></i>
+                        <div>
+                            <p class="font-bold text-sm text-gray-900">Required Parameters</p>
+                            <p class="text-gray-600 text-xs mt-0.5">Required parameters are marked with an asterisk (*) and must be provided.</p>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+        }
+        
+        function setupEndpointEvents(endpoint) {
+            const executeBtn = document.getElementById('execute-btn');
+            const copyCurlBtn = document.getElementById('copy-curl');
+            const copyResponseBtn = document.getElementById('copy-response');
+            const paramInputs = document.querySelectorAll('.param-input');
+            const fileInput = document.getElementById('file-input');
+            const browseFilesBtn = document.getElementById('browse-files-btn');
+            const fileUploadArea = document.getElementById('file-upload-area');
+            
+            // NEW: File upload handling
+            browseFilesBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files);
+                uploadedFiles.push(...files);
+                renderUploadedFiles();
+                updateCurlCommand(endpoint);
+                updateExamples(endpoint);
+            });
+            
+            // Drag and drop for file upload
+            fileUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.add('dragover');
+            });
+            
+            fileUploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+            });
+            
+            fileUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+                
+                const files = Array.from(e.dataTransfer.files);
+                uploadedFiles.push(...files);
+                renderUploadedFiles();
+                updateCurlCommand(endpoint);
+                updateExamples(endpoint);
+            });
+            
+            // Update cURL on parameter change
+            paramInputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    updateCurlCommand(endpoint);
+                });
+            });
+            
+            // Copy cURL
+            copyCurlBtn.addEventListener('click', () => {
+                const curlText = document.getElementById('curl-area').textContent;
+                navigator.clipboard.writeText(curlText);
+                
+                const originalHTML = copyCurlBtn.innerHTML;
+                copyCurlBtn.innerHTML = '<i class="fas fa-check mr-1"></i> Copied';
+                copyCurlBtn.classList.add('bg-green-100', 'border-green-500', 'text-green-700');
+                
+                setTimeout(() => {
+                    copyCurlBtn.innerHTML = originalHTML;
+                    copyCurlBtn.classList.remove('bg-green-100', 'border-green-500', 'text-green-700');
+                }, 2000);
+            });
+            
+            // Copy response
+            copyResponseBtn.addEventListener('click', () => {
+                const responseArea = document.getElementById('response-area');
+                let textToCopy = '';
+                
+                // Ambil teks berdasarkan tipe response
+                if (responseArea.querySelector('pre')) {
+                    textToCopy = responseArea.querySelector('pre').textContent;
+                } else if (responseArea.querySelector('.text-response')) {
+                    textToCopy = responseArea.querySelector('.text-response').textContent;
+                } else {
+                    textToCopy = responseArea.textContent;
+                }
+                
+                navigator.clipboard.writeText(textToCopy);
+                
+                const icon = copyResponseBtn.querySelector('i');
+                const originalClass = icon.className;
+                icon.className = 'fas fa-check text-green-500 text-sm';
+                
+                setTimeout(() => {
+                    icon.className = originalClass;
+                }, 2000);
+            });
+            
+            // Execute request
+            executeBtn.addEventListener('click', async () => {
+                const responseLoader = document.getElementById('response-loader');
+                const responseTime = document.getElementById('response-time');
+                const responseStatus = document.getElementById('response-status');
+                const responseStatusContainer = document.getElementById('response-status-container');
+                const responseSize = document.getElementById('response-size');
+                const responseType = document.getElementById('response-type');
+                const headersSection = document.getElementById('headers-section');
+                
+                // Hide headers section
+                headersSection.classList.add('hidden');
+                
+                // Validate required params
+                let isValid = true;
+                paramInputs.forEach(input => {
+                    if (input.required && !input.value.trim()) {
+                        isValid = false;
+                        input.classList.add('border-red-500', 'bg-red-50');
+                    } else {
+                        input.classList.remove('border-red-500', 'bg-red-50');
+                    }
+                });
+                
+                if (!isValid) {
+                    executeBtn.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>Missing Required Parameters';
+                    executeBtn.classList.add('bg-red-500', 'border-red-500');
+                    
+                    setTimeout(() => {
+                        executeBtn.innerHTML = '<i class="fas fa-bolt mr-2"></i>EXECUTE REQUEST';
+                        executeBtn.classList.remove('bg-red-500', 'border-red-500');
+                    }, 2000);
+                    return;
+                }
+                
+                // Build URL
+                let path = endpoint.endpoint;
+                const params = {};
+                const body = {};
+                
+                paramInputs.forEach(input => {
+                    const name = input.dataset.param;
+                    const value = input.value.trim();
+                    
+                    if (value) {
+                        if (endpoint.method === 'GET') {
+                            params[name] = value;
+                        } else {
+                            body[name] = value;
+                        }
+                    }
+                });
+                
+                let url = `${currentDomain}${path}`;
+                
+                if (endpoint.method === 'GET' && Object.keys(params).length > 0) {
+                    const query = new URLSearchParams(params).toString();
+                    url += '?' + query;
+                }
+                
+                // UI state
+                executeBtn.disabled = true;
+                executeBtn.innerHTML = '<div class="loading-dots inline-flex"><span></span><span></span><span></span></div>';
+                responseLoader.classList.remove('hidden');
+                
+                const startTime = Date.now();
+                
+                try {
+                    const options = {
+                        method: endpoint.method,
+                        headers: { 
+                            'Accept': '*/*'
+                        }
+                    };
+                    
+                    // Check if we have files to upload
+                    if (uploadedFiles.length > 0 && (endpoint.method === 'POST' || endpoint.method === 'PUT' || endpoint.method === 'PATCH')) {
+                        // Use FormData for file upload
+                        const formData = new FormData();
+                        
+                        // Add regular parameters
+                        Object.keys(body).forEach(key => {
+                            formData.append(key, body[key]);
+                        });
+                        
+                        // Add files
+                        uploadedFiles.forEach(file => {
+                            formData.append('files', file);
+                        });
+                        
+                        options.body = formData;
+                    } else if (endpoint.method !== 'GET' && Object.keys(body).length > 0) {
+                        // Regular JSON request
+                        options.headers['Content-Type'] = 'application/json';
+                        options.body = JSON.stringify(body);
+                    }
+                    
+                    console.log('Making request to:', url);
+                    console.log('Request options:', options);
+                    
+                    // Make the actual request to the endpoint
+                    const response = await fetch(url, options);
+                    const endTime = Date.now();
+                    const duration = endTime - startTime;
+                    
+                    // Update response time
+                    responseTime.textContent = `${duration}ms`;
+                    
+                    // Update status
+                    responseStatus.textContent = `${response.status} ${response.statusText}`;
+                    responseStatus.className = response.ok 
+                        ? 'text-xs font-bold px-3 py-1 rounded border border-green-500 bg-green-100 text-green-700 code-font'
+                        : 'text-xs font-bold px-3 py-1 rounded border border-red-500 bg-red-100 text-red-700 code-font';
+                    
+                    responseStatusContainer.classList.remove('hidden');
+                    
+                    // Get response data
+                    const contentType = response.headers.get('content-type') || '';
+                    const contentLength = response.headers.get('content-length');
+                    
+                    // Update response info
+                    responseSize.textContent = contentLength ? formatFileSize(parseInt(contentLength)) : 'Unknown size';
+                    responseType.textContent = contentType.split(';')[0] || 'Unknown type';
+                    
+                    // Render headers dengan tabel yang bagus
+                    renderResponseHeaders(response.headers);
+                    
+                    // Handle different response types
+                    if (contentType.includes('application/json')) {
+                        // JSON response
+                        const data = await response.json();
+                        renderResponse(contentType, data, response.headers);
+                    } 
+                    else if (contentType.startsWith('image/') || 
+                             contentType.startsWith('video/') || 
+                             contentType.startsWith('audio/') ||
+                             contentType.includes('pdf') ||
+                             contentType.includes('octet-stream')) {
+                        // Binary file response
+                        const blob = await response.blob();
+                        renderResponse(contentType, blob, response.headers);
+                    } 
+                    else if (contentType.includes('text/')) {
+                        // Text response
+                        const text = await response.text();
+                        renderResponse(contentType, text, response.headers);
+                    } 
+                    else {
+                        // Unknown content type - try as text first, then blob
+                        try {
+                            const text = await response.text();
+                            renderResponse(contentType, text, response.headers);
+                        } catch (e) {
+                            const blob = await response.blob();
+                            renderResponse(contentType, blob, response.headers);
+                        }
+                    }
+                    
+                } catch (error) {
+                    const endTime = Date.now();
+                    const duration = endTime - startTime;
+                    
+                    // Show error response
+                    const responseArea = document.getElementById('response-area');
+                    responseArea.innerHTML = `
+                        <div class="text-response">
+                            Error: ${error.message}
+                            
+                            Request Details:
+                            - URL: ${url}
+                            - Method: ${endpoint.method}
+                            - Time: ${duration}ms
+                            
+                            Make sure:
+                            1. Server is running
+                            2. CORS is enabled
+                            3. Endpoint is correct
+                            
+                            Check browser console for more details.
+                        </div>
+                    `;
+                    
+                    responseTime.textContent = `${duration}ms`;
+                    responseStatus.textContent = 'Connection Error';
+                    responseStatus.className = 'text-xs font-bold px-3 py-1 rounded border border-red-500 bg-red-100 text-red-700 code-font';
+                    responseStatusContainer.classList.remove('hidden');
+                    
+                    console.error('Request failed:', error);
+                    
+                } finally {
+                    executeBtn.disabled = false;
+                    executeBtn.innerHTML = '<i class="fas fa-bolt mr-2"></i>EXECUTE REQUEST';
+                    responseLoader.classList.add('hidden');
+                }
+            });
+        }
+        
+        function updateStats() {
+            const totalEndpoints = allEndpoints.length;
+            const categories = [...new Set(allEndpoints.map(api => api.kategori || 'General'))];
+            
+            totalEndpointsEl.textContent = totalEndpoints;
+            totalCategoriesEl.textContent = categories.length;
+            categoriesCount.textContent = categories.length;
+            endpointsCount.textContent = totalEndpoints;
+            
+            // Update recent endpoints
+            const recentEndpointsContainer = document.getElementById('recent-endpoints');
+            const recentEndpoints = allEndpoints.slice(0, 3);
+            
+            recentEndpointsContainer.innerHTML = recentEndpoints.map(endpoint => {
+                const methodStyle = getMethodStyle(endpoint.method);
+                
+                return `
+                    <div class="endpoint-card p-4 cursor-pointer" onclick="showEndpointDetail('${endpoint.id}')">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="${methodStyle.class} method-badge">${endpoint.method}</span>
+                            <span class="text-xs text-gray-500">${endpoint.kategori || 'General'}</span>
+                        </div>
+                        <h4 class="font-bold">${endpoint.nama}</h4>
+                        <p class="text-sm text-gray-600 mt-1">${endpoint.deskripsi.substring(0, 80)}...</p>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderCategories() {
+            const categoriesList = document.getElementById('categories-list');
+            const categories = ['all', ...new Set(allEndpoints.map(api => api.kategori || 'General'))];
+            
+            categoriesList.innerHTML = categories.map(category => {
+                const count = category === 'all' 
+                    ? allEndpoints.length 
+                    : allEndpoints.filter(api => (api.kategori || 'General') === category).length;
+                
+                return `
+                    <button class="category-btn w-full text-left px-3 py-2.5 rounded text-sm hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-300"
+                            data-category="${category}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-folder text-gray-400 text-sm"></i>
+                                <span class="font-medium">${category === 'all' ? 'All Categories' : category}</span>
+                            </div>
+                            <span class="text-xs font-bold bg-gray-200 px-2 py-1 rounded">${count}</span>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+        }
+        
+        function renderEndpointsList() {
+            const endpointsList = document.getElementById('endpoints-list');
+            
+            endpointsList.innerHTML = allEndpoints.map(endpoint => {
+                const methodStyle = getMethodStyle(endpoint.method);
+                
+                return `
+                    <button class="endpoint-list-btn w-full text-left px-3 py-3 rounded text-sm hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-300"
+                            data-endpoint-id="${endpoint.id}">
+                        <div class="flex items-center gap-3">
+                            <span class="${methodStyle.class} method-badge">${endpoint.method}</span>
+                            <div class="flex-1 text-left">
+                                <div class="font-bold truncate text-sm">${endpoint.nama}</div>
+                                <div class="text-xs text-gray-500 truncate mt-0.5 code-font">${endpoint.endpoint}</div>
+                            </div>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+        }
+        
+        // Load API data from server
+        async function loadAPIData() {
+            try {
+                // Try to load from various API endpoints
+                const apiEndpoints = ['/api/info', '/api/endpoints', '/api/docs', '/api/v1/docs', '/api'];
+                
+                let apiData = null;
+                
+                for (const endpoint of apiEndpoints) {
+                    try {
+                        console.log(`Trying to fetch from: ${currentDomain + endpoint}`);
+                        const response = await fetch(currentDomain + endpoint);
+                        if (response.ok) {
+                            apiData = await response.json();
+                            console.log('Successfully loaded API data:', apiData);
+                            break;
+                        }
+                    } catch (error) {
+                        console.log(`Failed to load from ${endpoint}:`, error);
+                        continue;
+                    }
+                }
+                
+                if (!apiData) {
+                    console.log('No API data found, using fallback');
+                    loadFallbackData();
+                } else {
+                    // Process the data based on your API structure
+                    if (apiData.apis && Array.isArray(apiData.apis)) {
+                        allEndpoints = apiData.apis.map((api, index) => ({
+                            id: `api-${index + 1}`,
+                            nama: api.nama || api.name || api.title || `API ${index + 1}`,
+                            deskripsi: api.deskripsi || api.description || 'No description available',
+                            endpoint: api.endpoint || api.path || api.url || '/api/unknown',
+                            method: (api.method || 'GET').toUpperCase(),
+                            kategori: api.kategori || api.category || api.group || 'General',
+                            tags: [],
+                            parameter: (api.parameter || api.params || api.parameters || []).map(param => ({
+                                nama: param.nama || param.name || 'param',
+                                tipe: param.tipe || param.type || 'string',
+                                required: param.required !== false,
+                                contoh: param.contoh || param.example || '',
+                                deskripsi: param.deskripsi || param.description || ''
+                            }))
+                        }));
+                    } else if (Array.isArray(apiData)) {
+                        // If API returns array directly
+                        allEndpoints = apiData.map((api, index) => ({
+                            id: `api-${index + 1}`,
+                            nama: api.nama || api.name || api.title || `API ${index + 1}`,
+                            deskripsi: api.deskripsi || api.description || 'No description available',
+                            endpoint: api.endpoint || api.path || api.url || '/api/unknown',
+                            method: (api.method || 'GET').toUpperCase(),
+                            kategori: api.kategori || api.category || api.group || 'General',
+                            tags: [],
+                            parameter: (api.parameter || api.params || api.parameters || []).map(param => ({
+                                nama: param.nama || param.name || 'param',
+                                tipe: param.tipe || param.type || 'string',
+                                required: param.required !== false,
+                                contoh: param.contoh || param.example || '',
+                                deskripsi: param.deskripsi || param.description || ''
+                            }))
+                        }));
+                    } else {
+                        console.log('Unexpected API format, using fallback');
+                        loadFallbackData();
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error loading API data:', error);
+                loadFallbackData();
+            }
+            
+            // Update UI
+            renderCategories();
+            renderEndpointsList();
+            updateStats();
+            
+            // Hide loading state and show dashboard
+            loadingState.classList.add('hidden');
+            showDashboard();
+        }
+        
+        // Fallback data if API not available
+        function loadFallbackData() {
+            allEndpoints = [
+                {
+                    id: 'api-1',
+                    nama: 'Get All Users',
+                    deskripsi: 'Retrieve a list of all users in the system. This endpoint supports pagination and filtering by various criteria.',
+                    endpoint: '/api/users',
+                    method: 'GET',
+                    kategori: 'Users',
+                    tags: ['users', 'list', 'pagination'],
+                    parameter: [
+                        { nama: 'page', tipe: 'number', required: false, contoh: '1', deskripsi: 'Page number for pagination' },
+                        { nama: 'limit', tipe: 'number', required: false, contoh: '10', deskripsi: 'Number of items per page' },
+                        { nama: 'search', tipe: 'string', required: false, contoh: 'john', deskripsi: 'Search query to filter users' }
+                    ]
+                },
+                {
+                    id: 'api-2',
+                    nama: 'Create New User',
+                    deskripsi: 'Create a new user account with the provided information. Returns the created user object with ID.',
+                    endpoint: '/api/users',
+                    method: 'POST',
+                    kategori: 'Users',
+                    tags: ['users', 'create', 'registration'],
+                    parameter: [
+                        { nama: 'name', tipe: 'string', required: true, contoh: 'John Doe', deskripsi: 'Full name of the user' },
+                        { nama: 'email', tipe: 'string', required: true, contoh: 'john@example.com', deskripsi: 'Email address' },
+                        { nama: 'password', tipe: 'string', required: true, contoh: 'securePassword123', deskripsi: 'User password' }
+                    ]
+                },
+                {
+                    id: 'api-3',
+                    nama: 'Upload Image',
+                    deskripsi: 'Upload an image file to the server. Returns the URL of the uploaded image.',
+                    endpoint: '/api/upload/image',
+                    method: 'POST',
+                    kategori: 'Media',
+                    tags: ['upload', 'image', 'media'],
+                    parameter: [
+                        { nama: 'title', tipe: 'string', required: false, contoh: 'My Image', deskripsi: 'Title for the image' },
+                        { nama: 'description', tipe: 'string', required: false, contoh: 'A beautiful image', deskripsi: 'Description of the image' }
+                    ]
+                }
+            ];
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load API data
+            loadAPIData();
+            
+            // Sidebar event listeners
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            sidebarClose.addEventListener('click', closeSidebar);
+            overlay.addEventListener('click', closeSidebar);
+            
+            // TOMBOL STATUS PAGE - Tambahkan event listener
+            document.getElementById('status-page-btn').addEventListener('click', () => {
+                window.open('/status', '_blank');
+            });
+            
+            // TOMBOL STATUS PAGE DI DASHBOARD - Tambahkan event listener
+            document.getElementById('status-page-quick-btn').addEventListener('click', () => {
+                window.open('/status', '_blank');
+            });
+            
+            // Navigation event listeners
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    const view = this.dataset.view;
+                    if (view === 'dashboard') {
+                        showDashboard();
+                    } else if (view === 'category-all') {
+                        showCategory('all');
+                    }
+                });
+            });
+            
+            // Category buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.category-btn')) {
+                    const btn = e.target.closest('.category-btn');
+                    const category = btn.dataset.category;
+                    showCategory(category);
+                }
+            });
+            
+            // Endpoint list buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.endpoint-list-btn')) {
+                    const btn = e.target.closest('.endpoint-list-btn');
+                    const endpointId = btn.dataset.endpointId;
+                    showEndpointDetail(endpointId);
+                }
+            });
+            
+            // Quick access buttons
+            document.getElementById('browse-all-btn').addEventListener('click', () => {
+                showCategory('all');
+            });
+            
+            document.getElementById('quick-test-btn').addEventListener('click', () => {
+                showFirstEndpoint();
+            });
+            
+            // Tab switching
+            document.querySelectorAll('.tab-btn').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.dataset.tab;
+                    
+                    // Update tab buttons
+                    document.querySelectorAll('.tab-btn').forEach(t => {
+                        t.classList.remove('active', 'text-black', 'border-black');
+                        t.classList.add('text-gray-500');
+                    });
+                    this.classList.remove('text-gray-500');
+                    this.classList.add('active', 'text-black', 'border-black');
+                    
+                    // Show tab content
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+                });
+            });
+            
+            // Copy code buttons
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.copy-code-btn')) {
+                    const btn = e.target.closest('.copy-code-btn');
+                    const lang = btn.dataset.lang;
+                    const codeElement = document.getElementById(`${lang}-example`);
+                    
+                    if (codeElement) {
+                        navigator.clipboard.writeText(codeElement.textContent);
+                        
+                        const originalHTML = btn.innerHTML;
+                        btn.innerHTML = '<i class="fas fa-check mr-1"></i> Copied';
+                        btn.classList.add('bg-green-100', 'border-green-500', 'text-green-700');
+                        
+                        setTimeout(() => {
+                            btn.innerHTML = originalHTML;
+                            btn.classList.remove('bg-green-100', 'border-green-500', 'text-green-700');
+                        }, 2000);
+                    }
+                }
+            });
+            
+            // Search functionality
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = allEndpoints.filter(api => 
+                    api.nama.toLowerCase().includes(term) ||
+                    api.deskripsi.toLowerCase().includes(term) ||
+                    api.endpoint.toLowerCase().includes(term) ||
+                    (api.tags && api.tags.some(tag => tag.toLowerCase().includes(term)))
+                );
+                
+                // Update endpoints list in sidebar
+                const endpointsList = document.getElementById('endpoints-list');
+                endpointsList.innerHTML = filtered.map(endpoint => {
+                    const methodStyle = getMethodStyle(endpoint.method);
+                    
+                    return `
+                        <button class="endpoint-list-btn w-full text-left px-3 py-3 rounded text-sm hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-300"
+                                data-endpoint-id="${endpoint.id}">
+                            <div class="flex items-center gap-3">
+                                <span class="${methodStyle.class} method-badge">${endpoint.method}</span>
+                                <div class="flex-1 text-left">
+                                    <div class="font-bold truncate text-sm">${endpoint.nama}</div>
+                                    <div class="text-xs text-gray-500 truncate mt-0.5 code-font">${endpoint.endpoint}</div>
+                                </div>
+                            </div>
+                        </button>
+                    `;
+                }).join('');
+                
+                if (filtered.length === 0) {
+                    endpointsList.innerHTML = `
+                        <div class="text-center py-4 text-gray-500 text-sm">
+                            <i class="fas fa-search mb-2"></i>
+                            <p>No endpoints found</p>
+                            <p class="text-xs mt-1">Try different search terms</p>
+                        </div>
+                    `;
+                }
+            });
+            
+            // Close sidebar on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeSidebar();
+                }
+            });
+            
+            // Auto-hide sidebar on desktop when clicking outside
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth >= 768 && 
+                    !sidebar.contains(e.target) && 
+                    e.target.id !== 'sidebar-toggle' &&
+                    !e.target.closest('#sidebar-toggle')) {
+                    closeSidebar();
+                }
+            });
+            
+            // Keyboard shortcut for search
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            });
+        });
+        
+        // Expose functions to global scope for onclick handlers
+        window.toggleSidebar = toggleSidebar;
+        window.showDashboard = showDashboard;
+        window.showCategory = showCategory;
+        window.showEndpointDetail = showEndpointDetail;
+        window.showFirstEndpoint = showFirstEndpoint;
+        window.closeSidebar = closeSidebar;
+        window.removeUploadedFile = removeUploadedFile;
+    </script>
+</body>
+</html>
