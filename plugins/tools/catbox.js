@@ -9,28 +9,28 @@ const CONFIG = {
 
 module.exports = {
   name: "UploadCatbox",
-  desc: "Mengunggah file ke Catbox.moe via POST body",
+  desc: "Mengunggah raw biner file langsung dari body ke Catbox.moe",
   category: "Utility",
   method: "POST", 
   path: "/upload-catbox",
-  params: ["file"],
-  example: "Kirim file biner (multipart/form-data) atau raw buffer ke endpoint ini",
+  params: [], // Tanpa params query
+  example: "Kirim data biner file langsung pada body request (Content-Type: application/octet-stream)",
 
   async run(req, res) {
     try {
-      // Mengambil file dari req.file (jika Anda pakai multer) atau langsung dari req.body (raw buffer)
-      const fileBuffer = req.file?.buffer || req.body;
-      const fileName = req.file?.originalname || req.query.filename || "upload.png";
+      // Mengambil data biner mentah langsung dari body request
+      const fileBuffer = req.body;
 
-      // Validasi apakah ada file yang dikirim
-      if (!fileBuffer || (Buffer.isBuffer(fileBuffer) && fileBuffer.length === 0)) {
+      // Validasi apakah body berisi buffer yang valid dan tidak kosong
+      if (!fileBuffer || !Buffer.isBuffer(fileBuffer) || fileBuffer.length === 0) {
         return res.status(400).json({
           status: false,
-          message: "Gagal memproses request. Pastikan Anda telah mengirimkan file melalui body request.",
+          message: "Gagal memproses request. Kirimkan file Anda berupa data biner (raw binary data) langsung di dalam body request.",
           timestamp: new Date().toISOString()
         });
       }
 
+      // Menyiapkan multipart/form-data untuk dikirim ke Catbox
       const body = new FormData();
       body.append("reqtype", "fileupload");
 
@@ -38,9 +38,10 @@ module.exports = {
         body.append("userhash", CONFIG.userhash);
       }
 
-      // Memasukkan buffer file langsung ke FormData
+      // Memasukkan buffer langsung. Karena tanpa params, nama file kita default-kan secara aman
       body.append("fileToUpload", fileBuffer, {
-        filename: fileName
+        filename: "upload.bin",
+        contentType: "application/octet-stream"
       });
 
       // Proses kirim ke API Catbox
@@ -74,7 +75,6 @@ module.exports = {
         status: true,
         message: "Upload berhasil",
         data: {
-          filename: fileName,
           url: response.data.trim()
         },
         metadata: {
