@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Status</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: #fff; 
+            color: #000;
+            letter-spacing: -0.01em;
+        }
+        
+        .code-font {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+        }
+        
+        .status-card {
+            border: 1.5px solid #000;
+            background: #fff;
+            transition: all 0.2s;
+        }
+        
+        .status-card:hover {
+            box-shadow: 4px 4px 0px #000;
+            transform: translate(-2px, -2px);
+        }
+        
+        .indicator-online {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+        }
+        
+        .indicator-offline {
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        
+        .chart-container {
+            border: 1.5px solid #000;
+            background: #fff;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        
+        .btn-primary {
+            border: 1.5px solid #000;
+            background: #000;
+            color: #fff;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary:hover {
+            background: #fff;
+            color: #000;
+            box-shadow: 3px 3px 0px #000;
+        }
+        
+        .btn-secondary {
+            border: 1.5px solid #d1d5db;
+            background: #fff;
+            color: #374151;
+            transition: all 0.2s;
+        }
+        
+        .btn-secondary:hover {
+            border-color: #000;
+            color: #000;
+        }
+        
+        .terminal {
+            border: 1.5px solid #000;
+            background: #f9fafb;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+        
+        .terminal-line {
+            color: #059669;
+        }
+        
+        .terminal-line::before {
+            content: "> ";
+            color: #6b7280;
+        }
+        
+        .chart-tooltip {
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="border-b border-gray-200 py-4 px-6">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-lg font-bold">Server Status</h1>
+                        <p class="text-xs text-gray-500 mt-1">Real-time monitoring dashboard</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center">
+                            <span class="indicator-online" id="statusIndicator"></span>
+                            <span class="text-xs font-medium" id="serverStatus">SYSTEM ONLINE</span>
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            <span id="last-update">Updated just now</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Time Display -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="status-card p-4 text-center">
+                    <div class="text-xs text-gray-500 mb-1">WIB</div>
+                    <div class="text-lg font-bold" id="timeWIB">--:--:--</div>
+                </div>
+                <div class="status-card p-4 text-center">
+                    <div class="text-xs text-gray-500 mb-1">WITA</div>
+                    <div class="text-lg font-bold" id="timeWITA">--:--:--</div>
+                </div>
+                <div class="status-card p-4 text-center">
+                    <div class="text-xs text-gray-500 mb-1">WIT</div>
+                    <div class="text-lg font-bold" id="timeWIT">--:--:--</div>
+                </div>
+            </div>
+
+            <!-- System Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <!-- CPU -->
+                <div class="status-card p-4">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <div class="text-xs text-gray-500">CPU USAGE</div>
+                            <div class="text-xl font-bold mt-1" id="cpuUsage">0%</div>
+                        </div>
+                        <i class="fas fa-microchip text-gray-400"></i>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="cpuProgress" class="progress-fill bg-blue-600" style="width: 0%"></div>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-2">
+                        <span id="cpuCores">4</span> cores
+                    </div>
+                </div>
+
+                <!-- RAM -->
+                <div class="status-card p-4">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <div class="text-xs text-gray-500">RAM USAGE</div>
+                            <div class="text-xl font-bold mt-1" id="ramUsage">0.27 GB</div>
+                        </div>
+                        <i class="fas fa-memory text-gray-400"></i>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="ramProgress" class="progress-fill bg-purple-600" style="width: 8.6%"></div>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-2">
+                        <span id="ramPercent">8.6%</span> used
+                    </div>
+                </div>
+
+                <!-- Latency -->
+                <div class="status-card p-4">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <div class="text-xs text-gray-500">LATENCY</div>
+                            <div class="text-xl font-bold mt-1" id="avgLatency">1.785ms</div>
+                        </div>
+                        <i class="fas fa-tachometer-alt text-gray-400"></i>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="latencyProgress" class="progress-fill bg-green-600" style="width: 59.5%"></div>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-2">
+                        Current: <span id="currentLatency">1.790ms</span>
+                    </div>
+                </div>
+
+                <!-- Uptime -->
+                <div class="status-card p-4">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <div class="text-xs text-gray-500">UPTIME</div>
+                            <div class="text-xl font-bold mt-1" id="serverUptime">86400s</div>
+                        </div>
+                        <i class="fas fa-clock text-gray-400"></i>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-2">
+                        <span id="uptimeFormatted">24h 0m 0s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- CPU Chart -->
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-bold">CPU Usage History</h3>
+                        <span class="text-xs text-gray-500">Real-time</span>
+                    </div>
+                    <div class="chart-container p-4 h-64">
+                        <canvas id="cpuChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- RAM Chart -->
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-bold">RAM Usage History</h3>
+                        <span class="text-xs text-gray-500">Real-time</span>
+                    </div>
+                    <div class="chart-container p-4 h-64">
+                        <canvas id="ramChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Info & Activity -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Hardware Info -->
+                <div>
+                    <h3 class="text-sm font-bold mb-3">Hardware Information</h3>
+                    <div class="status-card p-5">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500">CPU Model</span>
+                                <span class="text-xs font-medium" id="cpuModel">Intel(R) Xeon(R) CPU @ 2.50GHz</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500">CPU Speed</span>
+                                <span class="text-xs font-medium" id="cpuSpeed">2.50 GHz</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500">Total RAM</span>
+                                <span class="text-xs font-medium" id="totalRam">3.14 GB</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500">Free RAM</span>
+                                <span class="text-xs font-medium" id="freeRam">2.87 GB</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500">Server Region</span>
+                                <span class="text-xs font-medium" id="serverRegion">Ashburn, US</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500">Operating System</span>
+                                <span class="text-xs font-medium" id="osInfo">Linux x64</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Log -->
+                <div>
+                    <h3 class="text-sm font-bold mb-3">Activity Log</h3>
+                    <div class="terminal p-4 h-full max-h-64 overflow-y-auto">
+                        <div id="activityLog">
+                            <!-- Logs will appear here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="mt-8 flex flex-wrap gap-3">
+                <button onclick="refreshData()" class="btn-primary px-4 py-2 text-sm font-medium">
+                    <i class="fas fa-sync-alt mr-2"></i>Refresh Data
+                </button>
+                <button onclick="toggleAutoRefresh()" class="btn-secondary px-4 py-2 text-sm font-medium">
+                    <i class="fas fa-clock mr-2"></i>Auto-refresh: <span id="refreshCount">10</span>s
+                </button>
+                <div class="ml-auto text-xs text-gray-500 flex items-center">
+                    <i class="fas fa-circle text-green-500 mr-1" id="apiStatusIcon"></i>
+                    <span>API Status: <span id="apiStatus" class="font-medium">Connected</span></span>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="mt-8 pt-6 border-t border-gray-200">
+                <div class="text-xs text-gray-500 flex flex-wrap gap-4">
+                    <span>© 2025 Server Monitoring</span>
+                    <span>Last check: <span id="lastCheck">--:--:--</span></span>
+                    <span>Version: 1.0.0</span>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        // Charts
+        let cpuChart, ramChart;
+        let refreshInterval;
+        let autoRefresh = true;
+        let refreshCount = 10;
+        let dataHistory = {
+            cpu: [],
+            ram: [],
+            time: []
+        };
+        
+        // Initialize charts
+        function initCharts() {
+            const cpuCtx = document.getElementById('cpuChart').getContext('2d');
+            const ramCtx = document.getElementById('ramChart').getContext('2d');
+            
+            // Tooltip styling
+            const tooltip = {
+                backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                borderColor: '#000',
+                borderWidth: 1,
+                cornerRadius: 4,
+                displayColors: false,
+                padding: 8,
+                bodyFont: {
+                    family: "'JetBrains Mono', monospace",
+                    size: 11
+                },
+                titleFont: {
+                    family: "'JetBrains Mono', monospace",
+                    size: 11
+                }
+            };
+            
+            // CPU Chart
+            cpuChart = new Chart(cpuCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'CPU Usage',
+                        data: [],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#3b82f6',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 500
+                    },
+                    plugins: { 
+                        legend: { 
+                            display: false 
+                        },
+                        tooltip: tooltip
+                    },
+                    scales: {
+                        x: { 
+                            display: true,
+                            grid: { 
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#6b7280',
+                                font: {
+                                    size: 10,
+                                    family: "'JetBrains Mono', monospace"
+                                },
+                                maxRotation: 0,
+                                maxTicksLimit: 6
+                            }
+                        },
+                        y: {
+                            min: 0,
+                            max: 100,
+                            grid: { 
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: { 
+                                color: '#6b7280',
+                                font: {
+                                    size: 10,
+                                    family: "'JetBrains Mono', monospace"
+                                },
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.4
+                        }
+                    }
+                }
+            });
+            
+            // RAM Chart
+            ramChart = new Chart(ramCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'RAM Usage (GB)',
+                        data: [],
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#8b5cf6',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 500
+                    },
+                    plugins: { 
+                        legend: { 
+                            display: false 
+                        },
+                        tooltip: tooltip
+                    },
+                    scales: {
+                        x: { 
+                            display: true,
+                            grid: { 
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#6b7280',
+                                font: {
+                                    size: 10,
+                                    family: "'JetBrains Mono', monospace"
+                                },
+                                maxRotation: 0,
+                                maxTicksLimit: 6
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 3.14,
+                            grid: { 
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: { 
+                                color: '#6b7280',
+                                font: {
+                                    size: 10,
+                                    family: "'JetBrains Mono', monospace"
+                                },
+                                callback: function(value) {
+                                    return value.toFixed(2) + ' GB';
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.4
+                        }
+                    }
+                }
+            });
+            
+            // Initialize with some data
+            for (let i = 9; i >= 0; i--) {
+                const time = new Date(Date.now() - i * 10000);
+                const label = time.toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const cpuValue = 8.6 + Math.random() * 5;
+                const ramValue = 0.27 + Math.random() * 0.05;
+                
+                cpuChart.data.labels.push(label);
+                cpuChart.data.datasets[0].data.push(cpuValue);
+                
+                ramChart.data.labels.push(label);
+                ramChart.data.datasets[0].data.push(ramValue);
+            }
+            
+            cpuChart.update();
+            ramChart.update();
+        }
+        
+        // Update time display
+        function updateTime() {
+            const now = new Date();
+            
+            document.getElementById('timeWIB').textContent = 
+                now.toLocaleTimeString('id-ID', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                });
+            
+            const wita = new Date(now.getTime() + 60 * 60 * 1000);
+            document.getElementById('timeWITA').textContent = 
+                wita.toLocaleTimeString('id-ID', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                });
+            
+            const wit = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+            document.getElementById('timeWIT').textContent = 
+                wit.toLocaleTimeString('id-ID', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                });
+        }
+        
+        // Add log entry
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('activityLog');
+            const time = new Date().toLocaleTimeString('id-ID', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            const icon = type === 'error' ? '' : type === 'success' ? '' : '️';
+            const colorClass = type === 'error' ? 'text-red-600' : type === 'success' ? 'text-green-600' : 'text-blue-600';
+            
+            log.innerHTML = `
+                <div class="terminal-line mb-2 ${colorClass}">
+                    [${time}] ${icon} ${message}
+                </div>
+            ` + log.innerHTML;
+            
+            // Keep only last 10 lines
+            const lines = log.innerHTML.split('</div>');
+            if (lines.length > 11) {
+                log.innerHTML = lines.slice(0, 11).join('</div>') + '</div>';
+            }
+            
+            // Auto scroll to top
+            log.scrollTop = 0;
+        }
+        
+        // Generate realistic server data
+        function generateServerData() {
+            const baseCpu = 8.6;
+            const baseRam = 0.27;
+            
+            // Add some realistic fluctuations
+            const time = Date.now();
+            const noise = Math.sin(time / 10000) * 3;
+            
+            const cpu = Math.max(0.1, Math.min(100, baseCpu + noise + (Math.random() * 4 - 2)));
+            const ram = Math.max(0.1, Math.min(3.14, baseRam + (Math.random() * 0.1 - 0.05)));
+            const ramPercent = (ram / 3.14 * 100).toFixed(1);
+            
+            // Latency with realistic pattern
+            const latencyNoise = Math.sin(time / 5000) * 0.01;
+            const latency = 1.78 + latencyNoise + (Math.random() * 0.02 - 0.01);
+            
+            return {
+                cpu: parseFloat(cpu.toFixed(1)),
+                ram: parseFloat(ram.toFixed(2)),
+                ramPercent: parseFloat(ramPercent),
+                latency: parseFloat(latency.toFixed(3)),
+                currentLatency: parseFloat((latency + Math.random() * 0.02 - 0.01).toFixed(3)),
+                uptime: 86400 + Math.floor(time / 1000) % 86400
+            };
+        }
+        
+        // Update display with new data
+        function updateDisplay(data) {
+            // Update CPU
+            document.getElementById('cpuUsage').textContent = `${data.cpu}%`;
+            document.getElementById('cpuProgress').style.width = `${data.cpu}%`;
+            
+            // Update RAM
+            document.getElementById('ramUsage').textContent = `${data.ram} GB`;
+            document.getElementById('ramPercent').textContent = `${data.ramPercent}%`;
+            document.getElementById('ramProgress').style.width = `${data.ramPercent}%`;
+            document.getElementById('freeRam').textContent = `${(3.14 - data.ram).toFixed(2)} GB`;
+            
+            // Update Latency
+            document.getElementById('avgLatency').textContent = `${data.latency}ms`;
+            document.getElementById('currentLatency').textContent = `${data.currentLatency}ms`;
+            
+            // Calculate progress for latency (lower is better)
+            const latencyPercent = Math.min(100, Math.max(0, (data.currentLatency / 3) * 100));
+            document.getElementById('latencyProgress').style.width = `${latencyPercent.toFixed(1)}%`;
+            
+            // Update Uptime
+            document.getElementById('serverUptime').textContent = `${data.uptime}s`;
+            
+            // Format uptime
+            const hours = Math.floor(data.uptime / 3600);
+            const minutes = Math.floor((data.uptime % 3600) / 60);
+            const seconds = data.uptime % 60;
+            document.getElementById('uptimeFormatted').textContent = `${hours}h ${minutes}m ${seconds}s`;
+            
+            // Update timestamp
+            const now = new Date();
+            document.getElementById('last-update').textContent = 
+                `Updated: ${now.toLocaleTimeString('id-ID', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                })}`;
+            
+            // Update last check
+            document.getElementById('lastCheck').textContent = 
+                now.toLocaleTimeString('id-ID', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                });
+        }
+        
+        // Update charts with new data
+        function updateCharts(data) {
+            const now = new Date();
+            const label = now.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // Update CPU Chart
+            cpuChart.data.labels.push(label);
+            cpuChart.data.datasets[0].data.push(data.cpu);
+            
+            if (cpuChart.data.labels.length > 15) {
+                cpuChart.data.labels.shift();
+                cpuChart.data.datasets[0].data.shift();
+            }
+            
+            cpuChart.update();
+            
+            // Update RAM Chart
+            ramChart.data.labels.push(label);
+            ramChart.data.datasets[0].data.push(data.ram);
+            
+            if (ramChart.data.labels.length > 15) {
+                ramChart.data.labels.shift();
+                ramChart.data.datasets[0].data.shift();
+            }
+            
+            ramChart.update();
+            
+            // Store in history
+            dataHistory.cpu.push(data.cpu);
+            dataHistory.ram.push(data.ram);
+            dataHistory.time.push(now);
+            
+            if (dataHistory.cpu.length > 100) {
+                dataHistory.cpu.shift();
+                dataHistory.ram.shift();
+                dataHistory.time.shift();
+            }
+        }
+        
+        // Fetch status data (simulated)
+        function fetchStatus() {
+            try {
+                const data = generateServerData();
+                
+                updateDisplay(data);
+                updateCharts(data);
+                
+                // Update status indicator
+                document.getElementById('serverStatus').textContent = 'SYSTEM ONLINE';
+                document.getElementById('statusIndicator').className = 'indicator-online';
+                document.getElementById('apiStatus').textContent = 'Connected';
+                document.getElementById('apiStatusIcon').className = 'fas fa-circle text-green-500 mr-1';
+                
+                // Add log if significant change
+                const lastCpu = dataHistory.cpu.length > 0 ? dataHistory.cpu[dataHistory.cpu.length - 1] : 0;
+                if (Math.abs(data.cpu - lastCpu) > 5) {
+                    addLog(`CPU usage changed: ${lastCpu.toFixed(1)}% → ${data.cpu.toFixed(1)}%`, 'info');
+                }
+                
+                return true;
+                
+            } catch (error) {
+                console.error('Error fetching status:', error);
+                
+                // Update status to offline
+                document.getElementById('serverStatus').textContent = 'SYSTEM OFFLINE';
+                document.getElementById('statusIndicator').className = 'indicator-offline';
+                document.getElementById('apiStatus').textContent = 'Disconnected';
+                document.getElementById('apiStatusIcon').className = 'fas fa-circle text-red-500 mr-1';
+                
+                addLog(`Connection error: ${error.message}`, 'error');
+                
+                return false;
+            }
+        }
+        
+        // Refresh data manually
+        function refreshData() {
+            fetchStatus();
+            resetRefreshCount();
+            addLog('Manual refresh requested', 'info');
+        }
+        
+        // Toggle auto refresh
+        function toggleAutoRefresh() {
+            autoRefresh = !autoRefresh;
+            const button = document.querySelector('button[onclick="toggleAutoRefresh()"]');
+            
+            if (autoRefresh) {
+                button.innerHTML = '<i class="fas fa-clock mr-2"></i>Auto-refresh: <span id="refreshCount">10</span>s';
+                startAutoRefresh();
+                addLog('Auto-refresh enabled', 'success');
+            } else {
+                button.innerHTML = '<i class="fas fa-pause mr-2"></i>Auto-refresh: Paused';
+                clearInterval(refreshInterval);
+                addLog('Auto-refresh paused', 'info');
+            }
+        }
+        
+        // Reset refresh count
+        function resetRefreshCount() {
+            refreshCount = 10;
+            document.getElementById('refreshCount').textContent = refreshCount;
+        }
+        
+        // Auto refresh with countdown
+        function startAutoRefresh() {
+            clearInterval(refreshInterval);
+            
+            refreshInterval = setInterval(() => {
+                if (!autoRefresh) return;
+                
+                refreshCount--;
+                document.getElementById('refreshCount').textContent = refreshCount;
+                
+                if (refreshCount <= 0) {
+                    fetchStatus();
+                    resetRefreshCount();
+                }
+            }, 1000);
+        }
+        
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // Initial data fetch
+            fetchStatus();
+            startAutoRefresh();
+            
+            // Initial logs
+            addLog('System monitor initialized successfully', 'success');
+            addLog('Connected to server: Intel(R) Xeon(R) CPU @ 2.50GHz', 'info');
+            addLog('Real-time monitoring started', 'success');
+            addLog('CPU: 8.6% | RAM: 0.27GB (8.6%) | Latency: 1.785ms', 'info');
+            
+            // Add some initial activity
+            setTimeout(() => addLog('Background processes running normally', 'info'), 2000);
+            setTimeout(() => addLog('Memory allocation optimized', 'success'), 4000);
+        });
+        
+        // Expose functions to window
+        window.refreshData = refreshData;
+        window.toggleAutoRefresh = toggleAutoRefresh;
+        
+        // API integration example (uncomment and modify for your server)
+        /*
+        async function fetchRealData() {
+            try {
+                // Replace with your actual API endpoint
+                const response = await fetch('/api/server-status');
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const data = await response.json();
+                
+                // Update with real data
+                document.getElementById('cpuUsage').textContent = `${data.cpu.usage}%`;
+                document.getElementById('ramUsage').textContent = `${data.ram.used} GB`;
+                document.getElementById('totalRam').textContent = `${data.ram.total} GB`;
+                document.getElementById('avgLatency').textContent = `${data.latency}ms`;
+                document.getElementById('serverUptime').textContent = `${data.uptime}s`;
+                
+                // Update charts
+                updateCharts({
+                    cpu: data.cpu.usage,
+                    ram: data.ram.used,
+                    ramPercent: (data.ram.used / data.ram.total * 100),
+                    latency: data.latency,
+                    currentLatency: data.currentLatency || data.latency,
+                    uptime: data.uptime
+                });
+                
+            } catch (error) {
+                console.error('Error fetching real data:', error);
+                addLog(`API Error: ${error.message}`, 'error');
+            }
+        }
+        */
+    </script>
+</body>
+</html>
