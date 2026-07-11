@@ -9,28 +9,66 @@ const CONFIG = {
 
 module.exports = {
   name: "UploadCatbox",
-  desc: "Mengunggah raw biner file langsung dari body ke Catbox.moe",
+  desc: "Mengunggah file dari body multipart/form-data ke Catbox.moe",
   category: "Utility",
   method: "POST", 
   path: "/upload-catbox",
-  params: [], // Tanpa params query
-  example: "Kirim data biner file langsung pada body request (Content-Type: application/octet-stream)",
+  params: [], 
+  example: "Unggah file langsung melalui form-data di dokumentasi API ini",
 
   async run(req, res) {
     try {
-      // Mengambil data biner mentah langsung dari body request
-      const fileBuffer = req.body;
+      let fileBuffer = null;
+      let fileName = "upload.png";
 
-      // Validasi apakah body berisi buffer yang valid dan tidak kosong
-      if (!fileBuffer || !Buffer.isBuffer(fileBuffer) || fileBuffer.length === 0) {
+      // 1. Cek apakah file diparsing oleh middleware uploader bawaan sistem Anda
+      if (req.file) {
+        fileBuffer = req.file.buffer;
+        fileName = req.file.originalname || "upload.png";
+      } else if (req.files) {
+        // Antisipasi jika menggunakan express-fileupload
+        const target = req.files.file || Object.values(req.files)[0];
+        const fileObj = Array.isArray(target) ? target[0] : target;
+        if (fileObj) {
+          fileBuffer = fileObj.data;
+          fileName = fileObj.name;
+        }
+      } 
+      
+      // 2. Jika middleware uploader tidak ada, extract manual Buffer dari stream req.body
+      if (!fileBuffer) {
+        if (Buffer.isBuffer(req.body) && req.body.length > 0) {
+          fileBuffer = req.body;
+        } else if (typeof req.body === "object" && req.body !== null) {
+          // Jika req.body berupa object biasa karena kepotong parser lain, cari biner di dalamnya
+          const values = Object.values(req.body);
+          const foundBuffer = values.find(val => Buffer.isBuffer(val));
+          if (foundBuffer) fileBuffer = foundBuffer;
+        }
+      }
+
+      // 3. Jika masih kosong, satukan data stream chunk demi chunk (fallback murni)
+      if (!fileBuffer) {
+        fileBuffer = await new Promise((resolve) => {
+          const chunks = [];
+          req.on("data", (chunk) => chunks.push(chunk));
+          req.on("end", () => resolve(Buffer.concat(chunks)));
+          req.on("error", () => resolve(null));
+        });
+      }
+
+      // 4. Validasi hasil akhir pencarian file
+      if (!fileBuffer || fileBuffer.length === 0) {
         return res.status(400).json({
           status: false,
-          message: "Gagal memproses request. Kirimkan file Anda berupa data biner (raw binary data) langsung di dalam body request.",
+          message: "Gagal memproses request. File tidak terdeteksi di dalam body.",
           timestamp: new Date().toISOString()
         });
       }
 
-      // Menyiapkan multipart/form-data untuk dikirim ke Catbox
+      // --- SINKRONISASI FORMAT UNTUK CATBOX ---
+      // Jika data yang didapat masih berformat mentah multipart (ada header boundary di dalam buffer), 
+      // kita bersihkan atau biarkan Catbox mendeteksinya sebagai file stream tunggal.
       const body = new FormData();
       body.append("reqtype", "fileupload");
 
@@ -38,9 +76,8 @@ module.exports = {
         body.append("userhash", CONFIG.userhash);
       }
 
-      // Memasukkan buffer langsung. Karena tanpa params, nama file kita default-kan secara aman
       body.append("fileToUpload", fileBuffer, {
-        filename: "upload.bin",
+        filename: fileName,
         contentType: "application/octet-stream"
       });
 
