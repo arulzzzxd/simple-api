@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat</title>
+    <link rel="icon" type="image/x-icon" href="https://i.pinimg.com/736x/0d/71/2a/0d712a0b6805c0b44386339048bdfce5.jpg?format=png&name=900x900">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'heading': ['"IBM Plex Mono"', 'monospace'],
+                        'body': ['"IBM Plex Mono"', 'monospace'],
+                    },
+                    colors: {
+                        'blackish': '#111',
+                        'whitish': '#f2f7f5',
+                        'purple-dark': '#2d1b69',
+                        'purple-light': '#8b5cf6',
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'slide-up': 'slide-up 0.3s ease-out',
+                        'bounce-soft': 'bounce-soft 1s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        'float': { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-10px)' } },
+                        'slide-up': { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        'bounce-soft': { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.05)' } }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            transition: all 0.2s ease;
+            font-family: 'IBM Plex Mono', monospace;
+            letter-spacing: -0.02em;
+        }
+        
+        body {
+            font-family: 'IBM Plex Mono', monospace;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #111;
+        }
+        
+        .light-mode ::-webkit-scrollbar-track {
+            background: #f2f7f5;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 0;
+        }
+        
+        .light-mode ::-webkit-scrollbar-thumb {
+            background: #8b5cf6;
+        }
+        
+        .raised-shadow {
+            box-shadow: 0.4rem 0.4rem 0 #222;
+            transition: all 0.2s ease;
+        }
+        
+        .light-mode .raised-shadow {
+            box-shadow: 0.4rem 0.4rem 0 #8b5cf6;
+        }
+        
+        .raised-shadow:hover {
+            transform: translate(0.1rem, 0.1rem);
+            box-shadow: 0.2rem 0.2rem 0 #222;
+        }
+        
+        .light-mode .raised-shadow:hover {
+            box-shadow: 0.2rem 0.2rem 0 #8b5cf6;
+        }
+        
+        .theme-toggle-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 0;
+            border: 2px solid #8b5cf6;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0.2rem 0.2rem 0 #222;
+            transition: all 0.2s ease;
+        }
+        
+        .light-mode .theme-toggle-btn {
+            background: #fff;
+            border: 2px solid #8b5cf6;
+            box-shadow: 0.2rem 0.2rem 0 #8b5cf6;
+        }
+        
+        .theme-toggle-btn:hover {
+            transform: translate(0.1rem, 0.1rem);
+            box-shadow: 0.1rem 0.1rem 0 #222;
+        }
+        
+        .light-mode .theme-toggle-btn:hover {
+            box-shadow: 0.1rem 0.1rem 0 #8b5cf6;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .chat-bubble {
+            border: 2px solid #8b5cf6;
+            background: #111;
+        }
+        
+        .light-mode .chat-bubble {
+            border: 2px solid #8b5cf6;
+            background: #fff;
+        }
+        
+        .user-bubble {
+            border: 2px solid #8b5cf6;
+            background: #2d1b69;
+        }
+        
+        .light-mode .user-bubble {
+            border: 2px solid #8b5cf6;
+            background: #e9d5ff;
+        }
+        
+        .typing-dot {
+            animation: bounce-soft 1s ease-in-out infinite;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+        
+        .message-enter {
+            animation: slide-up 0.3s ease-out;
+        }
+        
+        /* Styling for code blocks */
+        .code-block {
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            border-radius: 0;
+            padding: 16px;
+            margin: 12px 0;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: auto;
+            position: relative;
+            border: 2px solid #333;
+        }
+        
+        .light-mode .code-block {
+            background-color: #f8f9fa;
+            color: #333;
+            border: 2px solid #8b5cf6;
+        }
+        
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #333;
+        }
+        
+        .light-mode .code-header {
+            border-bottom: 2px solid #8b5cf6;
+        }
+        
+        .code-language {
+            font-size: 12px;
+            color: #8b5cf6;
+            font-weight: 500;
+        }
+        
+        .copy-btn {
+            background: #111;
+            border: 2px solid #8b5cf6;
+            color: #8b5cf6;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .light-mode .copy-btn {
+            background: #fff;
+            border: 2px solid #8b5cf6;
+            color: #8b5cf6;
+        }
+        
+        .copy-btn:hover {
+            background: #2d1b69;
+        }
+        
+        .light-mode .copy-btn:hover {
+            background: #e9d5ff;
+        }
+        
+        .copy-btn.copied {
+            background: #10b981;
+            border-color: #10b981;
+            color: white;
+        }
+        
+        .code-content {
+            white-space: pre-wrap;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+        
+        /* Styling for highlighted text */
+        .highlighted-text {
+            background-color: rgba(139, 92, 246, 0.2);
+            padding: 0 2px;
+            border-radius: 0;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+        
+        .light-mode .highlighted-text {
+            background-color: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        
+        /* File preview styling */
+        .file-preview-container {
+            border: 2px solid #8b5cf6;
+            background: #111;
+        }
+        
+        .light-mode .file-preview-container {
+            border: 2px solid #8b5cf6;
+            background: #f8f9fa;
+        }
+        
+        /* Input styling */
+        .input-field {
+            border: 2px solid #8b5cf6;
+            background: #111;
+            color: white;
+            font-family: 'IBM Plex Mono', monospace;
+            border-radius: 0;
+        }
+        
+        .light-mode .input-field {
+            background: white;
+            color: #111;
+            border: 2px solid #8b5cf6;
+        }
+        
+        .btn-primary {
+            border: 2px solid #8b5cf6;
+            background: #2d1b69;
+            color: white;
+            border-radius: 0;
+        }
+        
+        .light-mode .btn-primary {
+            background: #8b5cf6;
+            color: white;
+        }
+        
+        .btn-secondary {
+            border: 2px solid #8b5cf6;
+            background: #111;
+            color: #8b5cf6;
+            border-radius: 0;
+        }
+        
+        .light-mode .btn-secondary {
+            background: white;
+            color: #8b5cf6;
+        }
+        
+        @keyframes broken-link {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+        
+        .broken-link {
+            animation: broken-link 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="font-body bg-black text-white min-h-screen">
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Theme Toggle Button di bagian atas -->
+        <div class="flex justify-end mb-4">
+            <button id="themeToggle" class="theme-toggle-btn">
+                <svg id="theme-toggle-dark-icon" class="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                </svg>
+                <svg id="theme-toggle-light-icon" class="w-4 h-4 text-purple-600 hidden" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div class="border-2 border-purple-500 p-6 raised-shadow mb-8">
+            <div class="text-center">
+                <h1 class="text-3xl md:text-4xl font-bold font-heading mb-4 flex items-center justify-center gap-4">
+                    AI Chat
+                </h1>
+                <p class="text-lg mb-2">Powered by <span class="text-purple-400 font-bold">Shikakuzu</span></p>
+            </div>
+        </div>
+
+        <div id="chat" class="border-2 border-purple-500 p-6 raised-shadow min-h-[60vh] max-h-[70vh] overflow-y-auto mb-6 bg-black">
+            <div class="text-center mb-8">
+                <div class="chat-bubble p-6 inline-block max-w-md">
+                    <div class="text-2xl mb-3 font-bold">Hai 👋</div>
+                    <p class="mb-3">Welcome! Please start a conversation with AI.</p>
+                    <p class="text-xs opacity-60">Support: Image, Video, Audio, and PDF</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-2 border-purple-500 p-6 raised-shadow">
+            <div id="file-preview" class="hidden mb-4">
+                <div class="file-preview-container p-4 flex items-center justify-between">
+                    <div id="preview-content" class="flex items-center space-x-3"></div>
+                    <button type="button" id="remove-file" class="text-red-400 hover:text-red-600 p-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <form id="form" class="space-y-4">
+                <div class="flex items-end space-x-4">
+                    <div class="flex-1">
+                        <textarea name="text" placeholder="Ketik pesan..." rows="1" 
+                                class="w-full resize-none p-4 input-field focus:outline-none focus:border-purple-400 text-white placeholder-gray-400"
+                                oninput="autoResize(this)"></textarea>
+                    </div>
+                    
+                    <input type="file" name="file" accept="image/*,video/mp4,audio/*,application/pdf" class="hidden" id="file-upload">
+                    
+                    <label for="file-upload" class="btn-secondary p-3 cursor-pointer hover:bg-purple-900">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                        </svg>
+                    </label>
+                    
+                    <button type="submit" class="btn-primary p-3 hover:bg-purple-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+    <script>
+        const chat = document.getElementById("chat");
+        const form = document.getElementById("form");
+        const textarea = form.querySelector("textarea");
+        const fileInput = document.getElementById("file-upload");
+        const filePreview = document.getElementById("file-preview");
+        const previewContent = document.getElementById("preview-content");
+        const removeFileBtn = document.getElementById("remove-file");
+        
+        let selectedFile = null;
+        let isTyping = false;
+
+        function autoResize(el) {
+            el.style.height = 'auto';
+            const maxHeight = 120;
+            const newHeight = Math.min(el.scrollHeight, maxHeight);
+            el.style.height = newHeight + 'px';
+            el.style.overflowY = newHeight === maxHeight ? 'auto' : 'hidden';
+        }
+
+        function getFileIcon(fileType) {
+            const icons = {
+                'image': `<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>`,
+                'video': `<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>`,
+                'audio': `<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>`,
+                'pdf': `<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>`
+            };
+            const type = fileType === 'application/pdf' ? 'pdf' : fileType.split('/')[0];
+            return icons[type] || icons.audio;
+        }
+
+        function showTypingIndicator() {
+            if (isTyping) return;
+            isTyping = true;
+            
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'flex justify-start mb-4 message-enter';
+            typingDiv.innerHTML = `
+                <div class="chat-bubble p-4 max-w-xs">
+                    <div class="flex items-center space-x-2">
+                        <div class="flex space-x-1">
+                            <div class="w-2 h-2 bg-purple-400 rounded-full typing-dot"></div>
+                            <div class="w-2 h-2 bg-purple-500 rounded-full typing-dot"></div>
+                            <div class="w-2 h-2 bg-purple-600 rounded-full typing-dot"></div>
+                        </div>
+                    </div>
+                </div>`;
+            
+            chat.appendChild(typingDiv);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) indicator.remove();
+            isTyping = false;
+        }
+
+        function showFilePreview(file) {
+            selectedFile = file;
+            const fileType = file.type;
+            previewContent.innerHTML = '';
+            
+            if (fileType.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.className = 'h-16 w-16 object-cover border-2 border-purple-500';
+                img.onload = () => URL.revokeObjectURL(img.src);
+                
+                const fileInfo = document.createElement('div');
+                fileInfo.innerHTML = `<div class="text-sm font-semibold">${file.name}</div><div class="text-xs opacity-70 bg-purple-900 px-2 py-1 inline-block mt-1">${(file.size / 1024).toFixed(1)} KB</div>`;
+                
+                previewContent.appendChild(img);
+                previewContent.appendChild(fileInfo);
+            } else if (fileType === 'video/mp4') {
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(file);
+                video.className = 'h-16 w-24 object-cover border-2 border-purple-500';
+                video.muted = true;
+                video.onloadeddata = () => URL.revokeObjectURL(video.src);
+                
+                const fileInfo = document.createElement('div');
+                fileInfo.innerHTML = `<div class="text-sm font-semibold">${file.name}</div><div class="text-xs opacity-70 bg-purple-900 px-2 py-1 inline-block mt-1">${(file.size / 1024 / 1024).toFixed(1)} MB</div>`;
+                
+                previewContent.appendChild(video);
+                previewContent.appendChild(fileInfo);
+            } else if (fileType.startsWith('audio/')) {
+                const audioContainer = document.createElement('div');
+                audioContainer.className = 'flex items-center space-x-3';
+                
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'flex-shrink-0 p-2 bg-purple-900';
+                iconDiv.innerHTML = getFileIcon(fileType);
+                
+                const fileInfo = document.createElement('div');
+                fileInfo.innerHTML = `<div class="text-sm font-semibold">${file.name}</div><div class="text-xs opacity-70 bg-purple-900 px-2 py-1 inline-block mt-1">${(file.size / 1024 / 1024).toFixed(1)} MB</div><div class="text-xs text-purple-400 mt-1">🎵 File Audio</div>`;
+                
+                audioContainer.appendChild(iconDiv);
+                audioContainer.appendChild(fileInfo);
+                previewContent.appendChild(audioContainer);
+            } else if (fileType === 'application/pdf') {
+                const pdfContainer = document.createElement('div');
+                pdfContainer.className = 'flex items-center space-x-3';
+                
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'flex-shrink-0 p-2 bg-purple-900';
+                iconDiv.innerHTML = getFileIcon(fileType);
+                
+                const fileInfo = document.createElement('div');
+                fileInfo.innerHTML = `<div class="text-sm font-semibold">${file.name}</div><div class="text-xs opacity-70 bg-purple-900 px-2 py-1 inline-block mt-1">${(file.size / 1024 / 1024).toFixed(1)} MB</div><div class="text-xs text-purple-400 mt-1">📄 File PDF</div>`;
+                
+                pdfContainer.appendChild(iconDiv);
+                pdfContainer.appendChild(fileInfo);
+                previewContent.appendChild(pdfContainer);
+            }
+            
+            filePreview.classList.remove('hidden');
+        }
+
+        function removeFilePreview() {
+            selectedFile = null;
+            fileInput.value = '';
+            filePreview.classList.add('hidden');
+            previewContent.innerHTML = '';
+        }
+
+        function createMediaElement(file, fileUrl) {
+            const fileType = file.type;
+            
+            if (fileType.startsWith('image/')) {
+                return `<img src="${fileUrl}" alt="Gambar" class="max-w-xs border-2 border-purple-500 cursor-pointer hover:opacity-90 transition-opacity duration-200" onclick="window.open('${fileUrl}', '_blank')">`;
+            } else if (fileType === 'video/mp4') {
+                return `<video src="${fileUrl}" controls class="max-w-xs border-2 border-purple-500"></video>`;
+            } else if (fileType.startsWith('audio/')) {
+                return `<div class="border-2 border-purple-500 p-4 max-w-xs"><div class="flex items-center space-x-2 mb-2"><div class="text-purple-400">${getFileIcon(fileType)}</div><div><div class="text-sm font-semibold">${file.name}</div><div class="text-xs opacity-70">Audio File</div></div></div><audio src="${fileUrl}" controls class="w-full">Browser Anda tidak mendukung audio.</audio></div>`;
+            } else if (fileType === 'application/pdf') {
+                return `<div class="border-2 border-purple-500 p-4 max-w-md"><div class="flex items-center justify-between mb-3"><div class="flex items-center space-x-2"><div class="text-purple-400">${getFileIcon(fileType)}</div><div><div class="text-sm font-semibold">${file.name}</div><div class="text-xs opacity-70">PDF Document</div></div></div><button onclick="window.open('${fileUrl}', '_blank')" class="bg-purple-700 hover:bg-purple-600 text-white px-3 py-1 text-xs font-medium border-2 border-purple-500 flex items-center space-x-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg><span>Buka</span></button></div><iframe src="${fileUrl}" class="w-full h-40 border-2 border-purple-500 bg-white" title="${file.name}"></iframe></div>`;
+            }
+            return '';
+        }
+
+        function processTextFormatting(text) {
+            text = text.replace(/\*\*(.*?)\*\*/g, '<span class="font-bold text-lg">$1</span>');
+            text = text.replace(/\*(.*?)\*/g, '<span class="font-bold">$1</span>');
+            return text;
+        }
+
+        function processHighlightedText(message) {
+            const highlightRegex = /`(.*?)`/g;
+            return message.replace(highlightRegex, '<span class="highlighted-text">$1</span>');
+        }
+
+        function processCodeBlocks(message) {
+            // Fungsi ini akan memproses kode blocks TANPA mengganti \n dengan <br>
+            const codeBlockRegex = /```(\w+)?\s*([\s\S]*?)```/g;
+            const codeBlocks = [];
+            let match;
+            let lastIndex = 0;
+            let result = '';
+            
+            // Temukan semua code blocks
+            while ((match = codeBlockRegex.exec(message)) !== null) {
+                // Tambahkan teks sebelum code block
+                result += message.substring(lastIndex, match.index);
+                
+                const language = match[1] || 'text';
+                const code = match[2].trim();
+                const codeId = 'code-' + Math.random().toString(36).substr(2, 9);
+                
+                // Simpan kode asli untuk nanti
+                codeBlocks.push({
+                    id: codeId,
+                    code: code,
+                    language: language.toLowerCase()
+                });
+                
+                // Tambahkan placeholder untuk code block
+                result += `\u0001CODE_BLOCK_${codeBlocks.length - 1}\u0001`;
+                
+                lastIndex = codeBlockRegex.lastIndex;
+            }
+            
+            // Tambahkan sisa teks
+            result += message.substring(lastIndex);
+            
+            // Sekarang ganti \n dengan <br> HANYA di luar code blocks
+            result = result.replace(/\n/g, "<br>");
+            
+            // Ganti kembali placeholder dengan code blocks yang sudah diformat
+            codeBlocks.forEach((block, index) => {
+                const placeholder = `\u0001CODE_BLOCK_${index}\u0001`;
+                const escapedCode = block.code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                
+                const codeHtml = `
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-language">${block.language}</span>
+                        <button class="copy-btn" data-code-id="${block.id}" data-original-code="${block.code.replace(/"/g, '&quot;')}">
+                            <span>📄</span>
+                            <span>Salin</span>
+                        </button>
+                    </div>
+                    <pre class="code-content" id="${block.id}">${escapedCode}</pre>
+                </div>`;
+                
+                result = result.replace(placeholder, codeHtml);
+            });
+            
+            return result;
+        }
+
+        function handleCopyButtonClick(e) {
+            if (e.target.classList.contains('copy-btn') || e.target.closest('.copy-btn')) {
+                const button = e.target.classList.contains('copy-btn') ? e.target : e.target.closest('.copy-btn');
+                const codeId = button.getAttribute('data-code-id');
+                const originalCode = button.getAttribute('data-original-code');
+                
+                let codeToCopy = '';
+                
+                if (originalCode) {
+                    // Decode HTML entities
+                    codeToCopy = originalCode
+                        .replace(/&quot;/g, '"')
+                        .replace(/&lt;/g, '<')
+                        .replace(/&gt;/g, '>')
+                        .replace(/&amp;/g, '&');
+                } else {
+                    // Fallback: ambil dari elemen pre
+                    const codeElement = document.getElementById(codeId);
+                    if (codeElement) {
+                        codeToCopy = codeElement.textContent;
+                    }
+                }
+                
+                if (codeToCopy) {
+                    navigator.clipboard.writeText(codeToCopy)
+                        .then(() => {
+                            const originalText = button.innerHTML;
+                            button.innerHTML = '<span>✅</span><span>Disalin!</span>';
+                            button.classList.add('copied');
+                            
+                            setTimeout(() => {
+                                button.innerHTML = originalText;
+                                button.classList.remove('copied');
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy: ', err);
+                            button.innerHTML = '<span>❌</span><span>Gagal</span>';
+                            
+                            setTimeout(() => {
+                                button.innerHTML = '<span>📄</span><span>Salin</span>';
+                            }, 2000);
+                        });
+                }
+            }
+        }
+
+        document.addEventListener('click', handleCopyButtonClick);
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) showFilePreview(file);
+        });
+
+        removeFileBtn.addEventListener('click', removeFilePreview);
+        textarea.focus();
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const userText = formData.get("text");
+
+            if (userText.trim() === '' && !selectedFile) {
+                textarea.focus();
+                return;
+            }
+
+            let userMessageContent = '';
+            let fileUrl = '';
+            
+            if (selectedFile) {
+                fileUrl = URL.createObjectURL(selectedFile);
+                userMessageContent += createMediaElement(selectedFile, fileUrl);
+                formData.set("file", selectedFile);
+            }
+            
+            if (userText.trim() !== '') {
+                if (userMessageContent) userMessageContent += '<br>';
+                userMessageContent += processTextFormatting(userText);
+            }
+
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'flex justify-end mb-4 message-enter';
+            userMessageDiv.innerHTML = `<div class="user-bubble rounded-none p-4 max-w-md break-words">${userMessageContent}</div>`;
+            
+            chat.appendChild(userMessageDiv);
+            
+            const submitBtn = form.querySelector("button[type='submit']");
+            submitBtn.disabled = true;
+            textarea.disabled = true;
+            
+            removeFilePreview();
+            form.reset();
+            textarea.style.height = 'auto';
+            
+            showTypingIndicator();
+            chat.scrollTop = chat.scrollHeight;
+
+            try {
+                const res = await fetch("/chat", { method: "POST", body: formData });
+                const data = await res.json();
+
+                hideTypingIndicator();
+
+                const responseDiv = document.createElement('div');
+                responseDiv.className = 'flex justify-start mb-4 message-enter';
+
+                if (data.result) {
+                    // Gunakan fungsi processCodeBlocks yang baru
+                    let processedResponse = processCodeBlocks(data.result);
+                    processedResponse = processHighlightedText(processedResponse);
+                    processedResponse = processTextFormatting(processedResponse);
+                    
+                    responseDiv.innerHTML = `<div class="chat-bubble rounded-none p-4 max-w-4xl break-words"><div class="flex items-center mb-2"><div class="w-2 h-2 bg-purple-400 rounded-full mr-2"></div><span class="text-xs opacity-70 font-medium">Myana kyu tyawu - AI</span></div><div>${processedResponse}</div></div>`;
+                } else {
+                    responseDiv.innerHTML = `<div class="border-2 border-red-500 bg-red-900 p-4 max-w-md break-words"><div class="flex items-center mb-2"><div class="w-2 h-2 bg-red-400 rounded-full mr-2"></div><span class="text-xs text-red-300 font-medium">Error</span></div>${data.error}</div>`;
+                }
+
+                chat.appendChild(responseDiv);
+
+            } catch (error) {
+                hideTypingIndicator();
+                
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'flex justify-start mb-4 message-enter';
+                errorDiv.innerHTML = `<div class="border-2 border-red-500 bg-red-900 p-4 max-w-md break-words"><div class="flex items-center mb-2"><div class="w-2 h-2 bg-red-400 rounded-full mr-2"></div><span class="text-xs text-red-300 font-medium">Network Error</span></div>Gagal mengirim pesan. Periksa koneksi internet Anda.</div>`;
+                
+                chat.appendChild(errorDiv);
+            }
+
+            submitBtn.disabled = false;
+            textarea.disabled = false;
+            textarea.focus();
+            chat.scrollTop = chat.scrollHeight;
+            
+            if (fileUrl) {
+                setTimeout(() => URL.revokeObjectURL(fileUrl), 1000);
+            }
+        };
+
+        textarea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                form.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Theme toggle functionality
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+        const html = document.documentElement;
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+
+        if (savedTheme === 'light') {
+            enableLightMode();
+        }
+
+        themeToggleBtn.addEventListener('click', toggleTheme);
+
+        function toggleTheme() {
+            if (html.classList.contains('dark')) {
+                enableLightMode();
+                localStorage.setItem('theme', 'light');
+            } else {
+                enableDarkMode();
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        function enableLightMode() {
+            html.classList.remove('dark');
+            document.body.classList.add('light-mode');
+            document.body.classList.remove('bg-black', 'text-white');
+            document.body.classList.add('bg-whitish', 'text-blackish');
+            
+            document.querySelectorAll('.border-purple-500').forEach(element => {
+                element.classList.remove('border-purple-500');
+                element.classList.add('border-purple-600');
+            });
+            
+            document.querySelectorAll('.bg-black').forEach(element => {
+                element.classList.remove('bg-black');
+                element.classList.add('bg-whitish');
+            });
+            
+            document.querySelectorAll('.text-white').forEach(element => {
+                element.classList.remove('text-white');
+                element.classList.add('text-blackish');
+            });
+            
+            document.querySelectorAll('.input-field').forEach(element => {
+                element.classList.remove('text-white', 'bg-111');
+                element.classList.add('text-blackish', 'bg-white');
+            });
+            
+            themeToggleDarkIcon.classList.add('hidden');
+            themeToggleLightIcon.classList.remove('hidden');
+        }
+
+        function enableDarkMode() {
+            html.classList.add('dark');
+            document.body.classList.remove('light-mode');
+            document.body.classList.remove('bg-whitish', 'text-blackish');
+            document.body.classList.add('bg-black', 'text-white');
+            
+            document.querySelectorAll('.border-purple-600').forEach(element => {
+                element.classList.remove('border-purple-600');
+                element.classList.add('border-purple-500');
+            });
+            
+            document.querySelectorAll('.bg-whitish').forEach(element => {
+                element.classList.remove('bg-whitish');
+                element.classList.add('bg-black');
+            });
+            
+            document.querySelectorAll('.text-blackish').forEach(element => {
+                element.classList.remove('text-blackish');
+                element.classList.add('text-white');
+            });
+            
+            document.querySelectorAll('.input-field').forEach(element => {
+                element.classList.remove('text-blackish', 'bg-white');
+                element.classList.add('text-white', 'bg-111');
+            });
+            
+            themeToggleDarkIcon.classList.remove('hidden');
+            themeToggleLightIcon.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
