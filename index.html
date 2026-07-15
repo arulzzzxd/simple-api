@@ -2,9 +2,8 @@
 <html lang="en" class="dark h-full overflow-hidden select-none">
 <head>
     <meta charset="UTF-8">
-    <!-- Mencegah zoom paksa pada perangkat mobile -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Chat - Cyan Cyber</title>
+    <title>AI Chat - Cyan Cyberpunk v2</title>
     <link class="js-favicon" rel="icon" type="image/x-icon" href="https://i.pinimg.com/736x/0d/71/2a/0d712a0b6805c0b44386339048bdfce5.jpg?format=png&name=900x900">
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -18,29 +17,35 @@
                         'body': ['"Inter"', 'sans-serif'],
                     },
                     colors: {
-                        'cyan-ai-dark': '#0b111e', /* Warna latar belakang cyber lebih pekat */
-                        'cyan-ai-primary': '#06b6d4', /* Cyan Cyber utama */
+                        'cyan-ai-dark': '#060a13', /* Hitam neon cyber */
+                        'cyan-ai-primary': '#06b6d4',
                         'cyan-ai-secondary': '#0891b2',
                         'cyan-ai-bubble-user': '#0e7490',
-                        'cyan-ai-bubble-bot': '#111827',
+                        'cyan-ai-bubble-bot': '#0f172a',
                         'cyan-ai-text': '#e2f8fc',
                     },
                     animation: {
-                        'slide-up': 'slide-up 0.25s ease-out',
+                        'slide-up': 'slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                         'bounce-soft': 'bounce-soft 1s ease-in-out infinite',
-                        'pulse-cyan': 'pulse-cyan 2.5s infinite',
+                        'pulse-cyan': 'pulse-cyan 2s infinite',
+                        'glow-pulse': 'glow-pulse 3s infinite alternate',
                     },
                     keyframes: {
-                        'slide-up': { '0%': { opacity: '0', transform: 'translateY(12px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-                        'bounce-soft': { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.08)' } },
+                        'slide-up': { '0%': { opacity: '0', transform: 'translateY(15px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        'bounce-soft': { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.15)' } },
                         'pulse-cyan': {
-                            '0%, 100%': { boxShadow: '0 0 0 0 rgba(6, 182, 212, 0.4)' },
-                            '70%': { boxShadow: '0 0 0 8px rgba(6, 182, 212, 0)' }
+                            '0%, 100%': { boxShadow: '0 0 0 0 rgba(6, 182, 212, 0.4)', borderColor: 'rgba(6, 182, 212, 0.4)' },
+                            '70%': { boxShadow: '0 0 0 10px rgba(6, 182, 212, 0)', borderColor: 'rgba(6, 182, 212, 0.1)' }
+                        },
+                        'glow-pulse': {
+                            '0%': { filter: 'drop-shadow(0 0 2px rgba(6, 182, 212, 0.3))' },
+                            '100%': { filter: 'drop-shadow(0 0 12px rgba(6, 182, 212, 0.7))' }
                         }
                     },
                     boxShadow: {
-                        'cyan-glow': '0 0 20px -3px rgba(6, 182, 212, 0.25)',
-                        'cyan-neon': '0 0 8px rgba(6, 182, 212, 0.5)',
+                        'cyan-glow': '0 0 25px -5px rgba(6, 182, 212, 0.3)',
+                        'cyan-neon': '0 0 15px rgba(6, 182, 212, 0.4)',
+                        'cyan-neon-inset': 'inset 0 0 15px rgba(6, 182, 212, 0.15)',
                     }
                 }
             }
@@ -51,24 +56,27 @@
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap');
         
         * {
-            transition: all 0.15s ease-in-out;
-            letter-spacing: -0.01em;
-            /* Nonaktifkan double tap-to-zoom pada mobile */
+            transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            letter-spacing: -0.010em;
             touch-action: manipulation; 
         }
         
         body {
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            /* Grid Background Cyberpunk */
+            background-image: 
+                linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
         }
         
-        /* Scrollbar untuk box chat */
         ::-webkit-scrollbar {
             width: 5px;
         }
         
         ::-webkit-scrollbar-track {
-            background: #0b111e;
+            background: #060a13;
         }
         
         ::-webkit-scrollbar-thumb {
@@ -76,31 +84,27 @@
             border-radius: 99px;
         }
         
-        .hidden {
-            display: none;
-        }
-        
-        /* Bubble Chat Cyberpunk */
         .chat-bubble {
-            border-radius: 14px;
-            padding: 0.85rem 1.1rem;
+            border-radius: 16px;
+            padding: 0.95rem 1.2rem;
             position: relative;
             max-width: 85%;
+            word-break: break-word;
         }
 
         .user-bubble {
-            background-color: #0e7490;
+            background: linear-gradient(135deg, #0e7490, #0891b2);
             color: white;
-            border-bottom-right-radius: 2px;
-            box-shadow: 0 4px 12px rgba(14, 116, 144, 0.2);
+            border-bottom-right-radius: 3px;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.25);
         }
         
         .bot-bubble {
-            background-color: #111827;
+            background-color: #0f172a;
             color: #e2f8fc;
             border: 1px solid #1e293b;
-            border-bottom-left-radius: 2px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-bottom-left-radius: 3px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
         
         .typing-dot {
@@ -111,149 +115,83 @@
         .typing-dot:nth-child(3) { animation-delay: 0.3s; }
         
         .message-enter {
-            animation: slide-up 0.25s ease-out;
+            animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         
-        /* Code blocks */
         .code-block {
-            background-color: #050811;
+            background-color: #030712;
             color: #a5f3fc;
             border-radius: 8px;
             padding: 14px;
             margin: 10px 0;
-            font-family: 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace;
-            font-size: 13.5px;
-            line-height: 1.5;
-            overflow-x: auto;
-            border: 1px solid #16253b;
+            font-family: 'ui-monospace', monospace;
+            font-size: 13px;
+            border: 1px solid #1e293b;
         }
         
         .code-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             padding-bottom: 6px;
-            border-bottom: 1px solid #16253b;
-        }
-        
-        .code-language {
-            font-size: 11px;
-            color: #06b6d4;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        
-        .copy-btn {
-            background: #111827;
-            border: 1px solid #1e293b;
-            color: #06b6d4;
-            padding: 3px 8px;
-            font-size: 11px;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .copy-btn:hover {
-            background: #0e7490;
-            color: white;
-            border-color: #06b6d4;
-        }
-        
-        .copy-btn.copied {
-            background: #10b981;
-            border-color: #10b981;
-            color: white;
+            border-bottom: 1px solid #1e293b;
         }
         
         .highlighted-text {
-            background-color: rgba(6, 182, 212, 0.12);
+            background-color: rgba(6, 182, 212, 0.15);
             color: #22d3ee;
-            padding: 1px 4px;
+            padding: 1px 5px;
             border-radius: 4px;
-            border: 1px solid rgba(6, 182, 212, 0.25);
+            border: 1px solid rgba(6, 182, 212, 0.3);
             font-family: monospace;
         }
-        
-        .file-preview-container {
-            border: 1px solid #06b6d4;
-            background: #111827;
-            border-radius: 12px;
-        }
-        
-        .input-field {
-            border: 1px solid #1e293b;
-            background: #111827;
-            color: #e2f8fc;
-            border-radius: 12px;
+
+        /* Cursor berkedip untuk efek ketik */
+        .typing-cursor::after {
+            content: '▊';
+            animation: blink 0.8s step-start infinite;
+            color: #06b6d4;
+            margin-left: 2px;
         }
 
-        .input-field:focus {
-            border-color: #06b6d4;
-            box-shadow: 0 0 10px rgba(6, 182, 212, 0.15);
-        }
-        
-        .btn-primary {
-            background-color: #0e7490;
-            color: white;
-            border-radius: 12px;
-        }
-        
-        .btn-primary:hover {
-            background-color: #06b6d4;
-            box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
-        }
-        
-        .btn-secondary {
-            border: 1px solid #1e293b;
-            background: #111827;
-            color: #06b6d4;
-            border-radius: 12px;
-        }
-        
-        .btn-secondary:hover {
-            background: #1f2937;
-            border-color: #06b6d4;
+        @keyframes blink {
+            50% { opacity: 0; }
         }
     </style>
 </head>
-<!-- Mengunci Scroll pada Body -->
-<body class="font-body bg-cyan-ai-dark text-cyan-ai-text h-full overflow-hidden flex flex-col justify-between">
+<body class="bg-cyan-ai-dark text-cyan-ai-text h-full overflow-hidden flex flex-col justify-between">
     
-    <!-- Container Utama: Pas Satu Layar Penuh -->
     <main class="w-full h-full max-w-4xl mx-auto px-4 py-4 md:py-6 flex flex-col justify-between overflow-hidden">
         
-        <!-- Header (Sederhana & Cyberpunk) -->
-        <div class="border border-cyan-500/20 p-4 rounded-xl bg-cyan-ai-bubble-bot/50 shadow-cyan-glow mb-4 flex-shrink-0">
+        <!-- Header Cyberpunk -->
+        <div class="border border-cyan-500/30 p-4 rounded-xl bg-cyan-ai-bubble-bot/70 shadow-cyan-glow mb-4 flex-shrink-0 backdrop-blur-md">
             <div class="text-center">
                 <h1 class="text-2xl md:text-3xl font-bold font-heading flex items-center justify-center gap-3 text-cyan-ai-primary">
-                    <span class="p-1.5 border border-cyan-ai-primary/45 rounded-full animate-pulse-cyan">✨</span>
+                    <span class="p-1.5 border border-cyan-ai-primary rounded-full animate-pulse-cyan animate-glow-pulse">✨</span>
                     AI Chat Assistant
                 </h1>
-                <p class="text-xs mt-1 opacity-70">Powered by <span class="text-cyan-ai-primary font-semibold">Shikakuzu</span></p>
+                <p class="text-xs mt-1 opacity-70">Powered by <span class="text-cyan-ai-primary font-bold">Shikakuzu</span></p>
             </div>
         </div>
 
-        <!-- Chat Area (Scroll Hanya di Sini) -->
-        <div id="chat" class="flex-1 border border-cyan-500/10 p-4 rounded-xl overflow-y-auto mb-4 bg-cyan-ai-dark/40 shadow-inner">
+        <!-- Chat Area (Scrollable) -->
+        <div id="chat" class="flex-1 border border-cyan-500/20 p-4 rounded-xl overflow-y-auto mb-4 bg-cyan-ai-dark/60 shadow-cyan-neon-inset">
             <div class="text-center mb-6 message-enter">
-                <div class="bot-bubble p-5 inline-block max-w-md shadow-md">
+                <div class="bot-bubble p-5 inline-block max-w-md shadow-lg border border-cyan-500/25">
                     <div class="text-xl mb-2 font-bold font-heading text-cyan-ai-primary">Hai 👋</div>
-                    <p class="mb-2 text-cyan-400 text-sm">Selamat datang! Mari mulai percakapan dengan AI.</p>
-                    <p class="text-[11px] opacity-55">Support: Gambar, Video, Audio, dan PDF</p>
+                    <p class="mb-2 text-cyan-300 text-sm">Selamat datang! Mari mulai percakapan dengan AI.</p>
+                    <p class="text-[11px] opacity-65">Support: Gambar, Video, Audio, dan PDF</p>
                 </div>
             </div>
         </div>
 
-        <!-- Input Area (Paten di Bawah) -->
-        <div class="border border-cyan-500/20 p-4 rounded-xl bg-cyan-ai-bubble-bot shadow-cyan-glow flex-shrink-0">
+        <!-- Input Area -->
+        <div class="border border-cyan-500/30 p-4 rounded-xl bg-cyan-ai-bubble-bot/90 shadow-cyan-glow flex-shrink-0 backdrop-blur-md">
             <div id="file-preview" class="hidden mb-3">
-                <div class="file-preview-container p-3 flex items-center justify-between">
+                <div class="border border-cyan-500 bg-cyan-ai-dark p-3 flex items-center justify-between rounded-xl">
                     <div id="preview-content" class="flex items-center space-x-3"></div>
-                    <button type="button" id="remove-file" class="text-red-400 hover:text-red-500 p-1.5 rounded-full hover:bg-red-950/40">
+                    <button type="button" id="remove-file" class="text-red-400 hover:text-red-500 p-2 rounded-full hover:bg-red-950/40">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -262,23 +200,25 @@
             </div>
             
             <form id="form" class="space-y-3">
-                <div class="flex items-end space-x-2">
-                    <div class="flex-1">
+                <div class="flex items-center space-x-3">
+                    <div class="flex-1 min-w-0">
                         <textarea name="text" placeholder="Ketik pesan di sini..." rows="1" 
-                                class="w-full resize-none p-3.5 input-field focus:outline-none placeholder-cyan-900/60 text-sm"
+                                class="w-full resize-none p-3.5 border border-cyan-500/30 bg-cyan-ai-dark text-cyan-ai-text rounded-xl focus:outline-none focus:border-cyan-ai-primary focus:shadow-cyan-neon placeholder-cyan-900/80 text-sm"
                                 oninput="autoResize(this)"></textarea>
                     </div>
                     
                     <input type="file" name="file" accept="image/*,video/mp4,audio/*,application/pdf" class="hidden" id="file-upload">
                     
-                    <label for="file-upload" class="btn-secondary p-3 cursor-pointer flex-shrink-0" title="Unggah File">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <!-- Tombol Upload File -->
+                    <label for="file-upload" class="border border-cyan-500/40 bg-cyan-ai-dark text-cyan-400 hover:text-cyan-200 hover:border-cyan-400 p-3.5 cursor-pointer rounded-xl flex-shrink-0 flex items-center justify-center w-12 h-12 transition-all duration-200" title="Unggah File">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                         </svg>
                     </label>
                     
-                    <button type="submit" class="btn-primary p-3 flex-shrink-0" title="Kirim Pesan">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <!-- Tombol Kirim -->
+                    <button type="submit" class="bg-cyan-700 hover:bg-cyan-500 text-white hover:shadow-cyan-neon p-3.5 rounded-xl flex-shrink-0 flex items-center justify-center w-12 h-12 transition-all duration-200" title="Kirim Pesan">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                         </svg>
                     </button>
@@ -299,10 +239,7 @@
         let selectedFile = null;
         let isTyping = false;
 
-        // Mencegah zoom menggunakan gesture cubit (pinch-to-zoom) lewat JavaScript
-        document.addEventListener('gesturestart', function (e) {
-            e.preventDefault();
-        });
+        document.addEventListener('gesturestart', (e) => e.preventDefault());
 
         function autoResize(el) {
             el.style.height = 'auto';
@@ -331,7 +268,7 @@
             typingDiv.id = 'typing-indicator';
             typingDiv.className = 'flex justify-start mb-4 message-enter';
             typingDiv.innerHTML = `
-                <div class="bot-bubble p-3 max-w-xs shadow-md">
+                <div class="bot-bubble p-3 max-w-xs shadow-md border border-cyan-500/10">
                     <div class="flex items-center space-x-2">
                         <div class="flex space-x-1.5">
                             <div class="w-2 h-2 bg-cyan-600 rounded-full typing-dot"></div>
@@ -410,15 +347,14 @@
 
         function createMediaElement(file, fileUrl) {
             const fileType = file.type;
-            
             if (fileType.startsWith('image/')) {
-                return `<img src="${fileUrl}" alt="Gambar" class="max-w-xs border border-cyan-500 rounded-lg cursor-pointer hover:opacity-90" onclick="window.open('${fileUrl}', '_blank')">`;
+                return `<img src="${fileUrl}" alt="Gambar" class="max-w-xs border border-cyan-500 rounded-lg cursor-pointer hover:opacity-90 mb-2" onclick="window.open('${fileUrl}', '_blank')">`;
             } else if (fileType === 'video/mp4') {
-                return `<video src="${fileUrl}" controls class="max-w-xs border border-cyan-500 rounded-lg shadow-md"></video>`;
+                return `<video src="${fileUrl}" controls class="max-w-xs border border-cyan-500 rounded-lg shadow-md mb-2"></video>`;
             } else if (fileType.startsWith('audio/')) {
-                return `<div class="border border-cyan-500 rounded-lg p-3 max-w-xs bg-cyan-ai-bubble-bot"><div class="flex items-center space-x-2.5 mb-2"><div class="text-cyan-400 p-1.5 rounded bg-cyan-950">${getFileIcon(fileType)}</div><div><div class="text-xs font-semibold text-cyan-100">${file.name}</div><div class="text-[10px] text-cyan-400">Audio File</div></div></div><audio src="${fileUrl}" controls class="w-full h-8">Browser Anda tidak mendukung audio.</audio></div>`;
+                return `<div class="border border-cyan-500 rounded-lg p-3 max-w-xs bg-cyan-ai-bubble-bot mb-2"><div class="flex items-center space-x-2.5 mb-2"><div class="text-cyan-400 p-1.5 rounded bg-cyan-950">${getFileIcon(fileType)}</div><div><div class="text-xs font-semibold text-cyan-100">${file.name}</div></div></div><audio src="${fileUrl}" controls class="w-full h-8">Browser tidak mendukung.</audio></div>`;
             } else if (fileType === 'application/pdf') {
-                return `<div class="border border-cyan-500 rounded-lg p-3 max-w-sm bg-cyan-ai-bubble-bot shadow-md"><div class="flex items-center justify-between mb-2"><div class="flex items-center space-x-2"><div class="text-cyan-400 p-1.5 rounded bg-cyan-950">${getFileIcon(fileType)}</div><div><div class="text-xs font-semibold text-cyan-100">${file.name}</div><div class="text-[10px] text-cyan-400">PDF Document</div></div></div><button onclick="window.open('${fileUrl}', '_blank')" class="bg-cyan-700 hover:bg-cyan-600 text-white px-3 py-1 text-xs font-medium rounded flex items-center space-x-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg><span>Buka</span></button></div><iframe src="${fileUrl}" class="w-full h-32 border border-cyan-500 rounded bg-white"></iframe></div>`;
+                return `<div class="border border-cyan-500 rounded-lg p-3 max-w-sm bg-cyan-ai-bubble-bot shadow-md mb-2"><div class="flex items-center justify-between mb-2"><div class="flex items-center space-x-2"><div class="text-cyan-400 p-1.5 rounded bg-cyan-950">${getFileIcon(fileType)}</div><div class="text-xs font-semibold text-cyan-100">${file.name}</div></div><button onclick="window.open('${fileUrl}', '_blank')" class="bg-cyan-700 text-white px-3 py-1 text-xs rounded">Buka</button></div></div>`;
             }
             return '';
         }
@@ -430,16 +366,13 @@
         }
 
         function processHighlightedText(message) {
-            const highlightRegex = /`(.*?)`/g;
-            return message.replace(highlightRegex, '<span class="highlighted-text">$1</span>');
+            return message.replace(/`(.*?)`/g, '<span class="highlighted-text">$1</span>');
         }
 
         function processCodeBlocks(message) {
             const codeBlockRegex = /```(\w+)?\s*([\s\S]*?)```/g;
             const codeBlocks = [];
-            let match;
-            let lastIndex = 0;
-            let result = '';
+            let match, lastIndex = 0, result = '';
             
             while ((match = codeBlockRegex.exec(message)) !== null) {
                 result += message.substring(lastIndex, match.index);
@@ -447,73 +380,72 @@
                 const code = match[2].trim();
                 const codeId = 'code-' + Math.random().toString(36).substr(2, 9);
                 
-                codeBlocks.push({
-                    id: codeId,
-                    code: code,
-                    language: language.toLowerCase()
-                });
-                
+                codeBlocks.push({ id: codeId, code: code, language: language.toLowerCase() });
                 result += `\u0001CODE_BLOCK_${codeBlocks.length - 1}\u0001`;
                 lastIndex = codeBlockRegex.lastIndex;
             }
-            
             result += message.substring(lastIndex);
-            result = result.replace(/\n/g, "<br>");
             
             codeBlocks.forEach((block, index) => {
                 const placeholder = `\u0001CODE_BLOCK_${index}\u0001`;
                 const escapedCode = block.code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                
                 const codeHtml = `
-                <div class="code-block message-enter shadow-inner">
+                <div class="code-block shadow-inner">
                     <div class="code-header">
                         <span class="code-language">${block.language}</span>
-                        <button class="copy-btn" data-code-id="${block.id}" data-original-code="${block.code.replace(/"/g, '&quot;')}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
-                            <span>Salin</span>
-                        </button>
+                        <button class="copy-btn" data-original-code="${block.code.replace(/"/g, '&quot;')}">Salin</button>
                     </div>
-                    <pre class="code-content" id="${block.id}">${escapedCode}</pre>
+                    <pre class="overflow-x-auto" id="${block.id}">${escapedCode}</pre>
                 </div>`;
-                
                 result = result.replace(placeholder, codeHtml);
             });
-            
             return result;
         }
 
-        function handleCopyButtonClick(e) {
-            const button = e.target.closest('.copy-btn');
-            if (!button) return;
-            
-            const originalCode = button.getAttribute('data-original-code');
-            if (originalCode) {
-                const codeToCopy = originalCode
-                    .replace(/&quot;/g, '"')
-                    .replace(/&lt;/g, '<')
-                    .replace(/&gt;/g, '>')
-                    .replace(/&amp;/g, '&');
+        // FUNGSI ANIMASI KETIK (Typewriter Effect)
+        function typeWriter(element, htmlContent, delay = 15) {
+            return new Promise((resolve) => {
+                element.classList.add('typing-cursor');
+                let currentText = '';
+                let index = 0;
                 
-                navigator.clipboard.writeText(codeToCopy)
-                    .then(() => {
-                        const originalContent = button.innerHTML;
-                        button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg><span>Disalin!</span>';
-                        button.classList.add('copied');
-                        
-                        setTimeout(() => {
-                            button.innerHTML = originalContent;
-                            button.classList.remove('copied');
-                        }, 2000);
-                    })
-                    .catch(err => {
-                        console.error('Gagal menyalin: ', err);
-                        button.innerHTML = '<span>❌ Gagal</span>';
-                        setTimeout(() => { button.innerHTML = originalContent; }, 2000);
-                    });
-            }
+                // Parser sederhana untuk memisahkan tag HTML dan teks murni
+                const parts = htmlContent.match(/(<[^>]+>|[^<]+)/g) || [htmlContent];
+                
+                function type() {
+                    if (index < parts.length) {
+                        const part = parts[index];
+                        if (part.startsWith('<')) {
+                            // Jika tag HTML, langsung masukkan seluruhnya tanpa dieja
+                            currentText += part;
+                            element.innerHTML = currentText;
+                            index++;
+                            setTimeout(type, delay);
+                        } else {
+                            // Jika teks murni, eja satu per satu karakter
+                            let charIndex = 0;
+                            function typeChar() {
+                                if (charIndex < part.length) {
+                                    currentText += part[charIndex];
+                                    element.innerHTML = currentText;
+                                    charIndex++;
+                                    chat.scrollTop = chat.scrollHeight; // Auto-scroll ke bawah saat mengetik
+                                    setTimeout(typeChar, delay);
+                                } else {
+                                    index++;
+                                    setTimeout(type, delay);
+                                }
+                            }
+                            typeChar();
+                        }
+                    } else {
+                        element.classList.remove('typing-cursor');
+                        resolve();
+                    }
+                }
+                type();
+            });
         }
-
-        document.addEventListener('click', handleCopyButtonClick);
 
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -543,14 +475,12 @@
             }
             
             if (userText.trim() !== '') {
-                if (userMessageContent) userMessageContent += '<br>';
                 userMessageContent += processTextFormatting(userText);
             }
 
             const userMessageDiv = document.createElement('div');
             userMessageDiv.className = 'flex justify-end mb-4 message-enter';
             userMessageDiv.innerHTML = `<div class="chat-bubble user-bubble">${userMessageContent}</div>`;
-            
             chat.appendChild(userMessageDiv);
             
             const submitBtn = form.querySelector("button[type='submit']");
@@ -578,20 +508,30 @@
                     processedResponse = processHighlightedText(processedResponse);
                     processedResponse = processTextFormatting(processedResponse);
                     
-                    responseDiv.innerHTML = `<div class="chat-bubble bot-bubble"><div class="flex items-center mb-2 pb-1.5 border-b border-cyan-900/50"><div class="w-2.5 h-2.5 bg-cyan-ai-primary rounded-full mr-2 animate-pulse"></div><span class="text-xs text-cyan-200 font-semibold font-heading">AI Assistant</span></div><div>${processedResponse}</div></div>`;
+                    responseDiv.innerHTML = `
+                        <div class="chat-bubble bot-bubble">
+                            <div class="flex items-center mb-2 pb-1.5 border-b border-cyan-900/50">
+                                <div class="w-2.5 h-2.5 bg-cyan-ai-primary rounded-full mr-2 animate-pulse"></div>
+                                <span class="text-xs text-cyan-200 font-semibold font-heading">AI Assistant</span>
+                            </div>
+                            <div class="text-sm leading-relaxed" id="typing-box"></div>
+                        </div>`;
+                    
+                    chat.appendChild(responseDiv);
+                    
+                    // Mainkan efek ketik pada box pesan AI yang baru dibuat
+                    const typingBox = responseDiv.querySelector("#typing-box");
+                    await typeWriter(typingBox, processedResponse, 8);
                 } else {
-                    responseDiv.innerHTML = `<div class="rounded-xl border border-red-500/40 bg-red-950/30 p-4 max-w-md shadow-lg"><div class="flex items-center mb-2"><div class="w-2.5 h-2.5 bg-red-500 rounded-full mr-2"></div><span class="text-xs text-red-300 font-semibold font-heading">Error</span></div><div class="text-red-100 text-sm">${data.error}</div></div>`;
+                    responseDiv.innerHTML = `<div class="rounded-xl border border-red-500/30 bg-red-950/20 p-4 max-w-md shadow-lg text-red-100 text-sm">Error: ${data.error}</div>`;
+                    chat.appendChild(responseDiv);
                 }
-
-                chat.appendChild(responseDiv);
 
             } catch (error) {
                 hideTypingIndicator();
-                
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'flex justify-start mb-4 message-enter';
-                errorDiv.innerHTML = `<div class="rounded-xl border border-red-500/40 bg-red-950/30 p-4 max-w-md shadow-lg"><div class="flex items-center mb-2"><div class="w-2.5 h-2.5 bg-red-500 rounded-full mr-2"></div><span class="text-xs text-red-300 font-semibold font-heading">Network Error</span></div><div class="text-red-100 text-sm">Gagal mengirim pesan. Periksa koneksi internet Anda.</div></div>`;
-                
+                errorDiv.innerHTML = `<div class="rounded-xl border border-red-500/30 bg-red-950/20 p-4 max-w-md text-red-100 text-sm">Koneksi terputus. Silakan coba lagi.</div>`;
                 chat.appendChild(errorDiv);
             }
 
