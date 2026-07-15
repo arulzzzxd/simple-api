@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Chat - Cyan Cyberpunk v2</title>
+    <title>AI Chat - Cyan Cyberpunk v2.1</title>
     <link class="js-favicon" rel="icon" type="image/x-icon" href="https://i.pinimg.com/736x/0d/71/2a/0d712a0b6805c0b44386339048bdfce5.jpg?format=png&name=900x900">
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -17,7 +17,7 @@
                         'body': ['"Inter"', 'sans-serif'],
                     },
                     colors: {
-                        'cyan-ai-dark': '#060a13', /* Hitam neon cyber */
+                        'cyan-ai-dark': '#060a13',
                         'cyan-ai-primary': '#06b6d4',
                         'cyan-ai-secondary': '#0891b2',
                         'cyan-ai-bubble-user': '#0e7490',
@@ -26,13 +26,11 @@
                     },
                     animation: {
                         'slide-up': 'slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                        'bounce-soft': 'bounce-soft 1s ease-in-out infinite',
                         'pulse-cyan': 'pulse-cyan 2s infinite',
                         'glow-pulse': 'glow-pulse 3s infinite alternate',
                     },
                     keyframes: {
                         'slide-up': { '0%': { opacity: '0', transform: 'translateY(15px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-                        'bounce-soft': { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.15)' } },
                         'pulse-cyan': {
                             '0%, 100%': { boxShadow: '0 0 0 0 rgba(6, 182, 212, 0.4)', borderColor: 'rgba(6, 182, 212, 0.4)' },
                             '70%': { boxShadow: '0 0 0 10px rgba(6, 182, 212, 0)', borderColor: 'rgba(6, 182, 212, 0.1)' }
@@ -64,7 +62,6 @@
         body {
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
-            /* Grid Background Cyberpunk */
             background-image: 
                 linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
@@ -107,12 +104,23 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
         
+        /* Animasi Mengetik Tiga Titik */
         .typing-dot {
-            animation: bounce-soft 1s ease-in-out infinite;
+            width: 8px;
+            height: 8px;
+            background-color: #06b6d4;
+            border-radius: 50%;
+            display: inline-block;
+            animation: cyberBounce 1.4s infinite ease-in-out both;
         }
         
-        .typing-dot:nth-child(2) { animation-delay: 0.15s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes cyberBounce {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+            40% { transform: scale(1.0); opacity: 1; }
+        }
         
         .message-enter {
             animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -147,7 +155,6 @@
             font-family: monospace;
         }
 
-        /* Cursor berkedip untuk efek ketik */
         .typing-cursor::after {
             content: '▊';
             animation: blink 0.8s step-start infinite;
@@ -175,7 +182,7 @@
             </div>
         </div>
 
-        <!-- Chat Area (Scrollable) -->
+        <!-- Chat Area -->
         <div id="chat" class="flex-1 border border-cyan-500/20 p-4 rounded-xl overflow-y-auto mb-4 bg-cyan-ai-dark/60 shadow-cyan-neon-inset">
             <div class="text-center mb-6 message-enter">
                 <div class="bot-bubble p-5 inline-block max-w-md shadow-lg border border-cyan-500/25">
@@ -260,6 +267,7 @@
             return icons[type] || icons.audio;
         }
 
+        // Tampilan Loading AI Mengetik dengan Animasi Memantul Murni
         function showTypingIndicator() {
             if (isTyping) return;
             isTyping = true;
@@ -268,12 +276,13 @@
             typingDiv.id = 'typing-indicator';
             typingDiv.className = 'flex justify-start mb-4 message-enter';
             typingDiv.innerHTML = `
-                <div class="bot-bubble p-3 max-w-xs shadow-md border border-cyan-500/10">
+                <div class="bot-bubble p-4 max-w-xs shadow-md border border-cyan-500/20 bg-cyan-ai-bubble-bot">
                     <div class="flex items-center space-x-2">
-                        <div class="flex space-x-1.5">
-                            <div class="w-2 h-2 bg-cyan-600 rounded-full typing-dot"></div>
-                            <div class="w-2 h-2 bg-cyan-ai-primary rounded-full typing-dot"></div>
-                            <div class="w-2 h-2 bg-cyan-600 rounded-full typing-dot"></div>
+                        <span class="text-xs text-cyan-400 font-mono mr-1">AI sedang mengetik</span>
+                        <div class="flex space-x-1 items-center h-3">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
                         </div>
                     </div>
                 </div>`;
@@ -402,34 +411,31 @@
             return result;
         }
 
-        // FUNGSI ANIMASI KETIK (Typewriter Effect)
-        function typeWriter(element, htmlContent, delay = 15) {
+        // Efek Ketik Karakter AI
+        function typeWriter(element, htmlContent, delay = 8) {
             return new Promise((resolve) => {
                 element.classList.add('typing-cursor');
                 let currentText = '';
                 let index = 0;
                 
-                // Parser sederhana untuk memisahkan tag HTML dan teks murni
                 const parts = htmlContent.match(/(<[^>]+>|[^<]+)/g) || [htmlContent];
                 
                 function type() {
                     if (index < parts.length) {
                         const part = parts[index];
                         if (part.startsWith('<')) {
-                            // Jika tag HTML, langsung masukkan seluruhnya tanpa dieja
                             currentText += part;
                             element.innerHTML = currentText;
                             index++;
                             setTimeout(type, delay);
                         } else {
-                            // Jika teks murni, eja satu per satu karakter
                             let charIndex = 0;
                             function typeChar() {
                                 if (charIndex < part.length) {
                                     currentText += part[charIndex];
                                     element.innerHTML = currentText;
                                     charIndex++;
-                                    chat.scrollTop = chat.scrollHeight; // Auto-scroll ke bawah saat mengetik
+                                    chat.scrollTop = chat.scrollHeight;
                                     setTimeout(typeChar, delay);
                                 } else {
                                     index++;
@@ -519,7 +525,6 @@
                     
                     chat.appendChild(responseDiv);
                     
-                    // Mainkan efek ketik pada box pesan AI yang baru dibuat
                     const typingBox = responseDiv.querySelector("#typing-box");
                     await typeWriter(typingBox, processedResponse, 8);
                 } else {
@@ -535,9 +540,10 @@
                 chat.appendChild(errorDiv);
             }
 
+            // Membuka kembali form tapi menghilangkan auto-focus & menutup keyboard
             submitBtn.disabled = false;
             textarea.disabled = false;
-            textarea.focus();
+            textarea.blur(); 
             chat.scrollTop = chat.scrollHeight;
             
             if (fileUrl) {
