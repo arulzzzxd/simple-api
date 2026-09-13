@@ -1,17 +1,19 @@
 {
-  "name": "tempfiles",
+  "name": "cyan-neon-api-server",
   "version": "1.0.0",
-  "description": "Temporary file hosting powered by Supabase Storage",
-  "type": "module",
-  "engines": {
-    "node": "24.x"
-  },
+  "main": "server.js",
   "scripts": {
-    "dev": "vercel dev",
-    "deploy": "vercel --prod"
+    "start": "node server.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.48.0",
-    "hono": "^4.4.0"
+    "bcryptjs": "^2.4.3",
+    "connect-mongo": "^5.1.0",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "mongoose": "^8.3.1",
+    "passport": "^0.7.0",
+    "passport-github2": "^0.1.12",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-local": "^1.0.0"
   }
 }
