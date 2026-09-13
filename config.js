@@ -1,6 +1,6 @@
 module.exports = {
   PORT: process.env.PORT || 3000,
-  MONGO_URI: process.env.MONGO_URI || "mongodb+srv://username:password@cluster.mongodb.net/neon_api?retryWrites=true&w=majority",
+  MONGO_URI: process.env.MONGO_URI || "mongodb+srv://arulz-xd-owner:Haqqi0213@cluster0.fgxhxqm.mongodb.net/?appName=Cluster0",
   SESSION_SECRET: process.env.SESSION_SECRET || "cyan_neon_secret_key_12345",
   
   // Google OAuth Configuration
