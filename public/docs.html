@@ -2,7 +2,7 @@
 <html lang="id" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <title>Cyan Neon API - Home</title>
+  <title>Cyan Neon API - Docs</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -20,10 +20,19 @@
   </header>
 
   <div class="container">
-    <h1 data-lang="hero_title">Cyan Neon Rest API</h1>
-    <p data-lang="hero_desc">Layanan REST API cepat, stabil dengan tampilan Neon Cyan modern.</p>
-    <br>
-    <a href="/docs.html"><button class="btn-cyan">Lihat Docs</button></a>
+    <h1 data-lang="doc_title">Dokumentasi Endpoint</h1>
+    
+    <div style="border: 1px solid var(--border-color); padding: 15px; margin-top: 20px;">
+      <h3>GET /api/download/tiktok</h3>
+      <p>Download video TikTok tanpa watermark.</p>
+      <p><b>Parameter:</b></p>
+      <ul>
+        <li><code>url</code> (Required): Link video TikTok</li>
+        <li><code>apikey</code> (Required): Key API Anda</li>
+      </ul>
+      <p><b>Contoh Request:</b></p>
+      <code>/api/download/tiktok?url=HTTPS_TIKTOK_URL&apikey=YOUR_APIKEY</code>
+    </div>
   </div>
 
   <script src="/js/theme.js"></script>
